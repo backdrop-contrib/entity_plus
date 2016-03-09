@@ -105,14 +105,14 @@ function entity_metadata_comment_get_node_properties($node, array $options, $nam
  * Getter callback for getting global languages.
  */
 function entity_metadata_locale_get_languages($data, array $options, $name) {
-  return isset($GLOBALS[$name]) ? $GLOBALS[$name]->language : NULL;
+  return isset($GLOBALS[$name]) ? $GLOBALS[$name]->langcode : NULL;
 }
 
 /**
  * Getter callback for getting the preferred user language.
  */
 function entity_metadata_locale_get_user_language($account, array $options, $name) {
-  return user_preferred_language($account)->language;
+  return user_preferred_language($account)->langcode;
 }
 
 /**
@@ -145,7 +145,7 @@ function entity_metadata_node_get_properties($node, array $options, $name, $enti
       return url('node/' . $node->nid . '/edit', $options);
 
     case 'author':
-      return !empty($node->uid) ? $node->uid : drupal_anonymous_user();
+      return !empty($node->uid) ? $node->uid : backdrop_anonymous_user();
   }
 }
 
@@ -229,7 +229,7 @@ function entity_metadata_statistics_properties_access($op, $property, $entity = 
 function entity_metadata_system_get_properties($data = FALSE, array $options, $name) {
   switch ($name) {
     case 'name':
-      return variable_get('site_name', 'Drupal');
+      return variable_get('site_name', 'Backdrop');
 
     case 'url':
       return url('<front>', $options);
@@ -238,7 +238,7 @@ function entity_metadata_system_get_properties($data = FALSE, array $options, $n
       return url('user', $options);
 
     case 'current_user':
-      return $GLOBALS['user']->uid ? $GLOBALS['user']->uid : drupal_anonymous_user();
+      return $GLOBALS['user']->uid ? $GLOBALS['user']->uid : backdrop_anonymous_user();
 
     case 'current_date':
       return REQUEST_TIME;
@@ -397,7 +397,7 @@ function entity_metadata_user_set_properties($account, $name, $value) {
 function entity_metadata_user_roles($property_name = 'roles', $info = array(), $op = 'edit') {
   $roles = user_roles();
   if ($op == 'edit') {
-    unset($roles[DRUPAL_AUTHENTICATED_RID], $roles[DRUPAL_ANONYMOUS_RID]);
+    unset($roles[BACKDROP_AUTHENTICATED_RID], $roles[BACKDROP_ANONYMOUS_RID]);
   }
   return $roles;
 }
@@ -419,7 +419,7 @@ function entity_metadata_language_list() {
   $list = array();
   $list[LANGUAGE_NONE] = t('Language neutral');
   foreach (language_list() as $language) {
-    $list[$language->language] = t($language->name);
+    $list[$language->langcode] = t($language->name);
   }
   return $list;
 }
@@ -430,7 +430,7 @@ function entity_metadata_language_list() {
 function entity_metadata_field_property_get($entity, array $options, $name, $entity_type, $info) {
   $field = field_info_field($name);
   $columns = array_keys($field['columns']);
-  $langcode = isset($options['language']) ? $options['language']->language : LANGUAGE_NONE;
+  $langcode = isset($options['language']) ? $options['language']->langcode : LANGUAGE_NONE;
   $langcode = entity_metadata_field_get_language($entity_type, $entity, $field, $langcode, TRUE);
   $values = array();
   if (isset($entity->{$name}[$langcode])) {
@@ -468,7 +468,7 @@ function entity_metadata_field_property_set($entity, $name, $value, $langcode, $
   $entity->{$name}[$langcode] = $items;
   // Empty the static field language cache, so the field system picks up any
   // possible new languages.
-  drupal_static_reset('field_language');
+  backdrop_static_reset('field_language');
 }
 
 /**
@@ -511,7 +511,7 @@ function entity_metadata_field_verbatim_get($entity, array $options, $name, $ent
   // Set contextual info useful for getters of any child properties.
   $context['instance'] = field_info_instance($context['parent']->type(), $name, $context['parent']->getBundle());
   $context['field'] = field_info_field($name);
-  $langcode = isset($options['language']) ? $options['language']->language : LANGUAGE_NONE;
+  $langcode = isset($options['language']) ? $options['language']->langcode : LANGUAGE_NONE;
   $langcode = entity_metadata_field_get_language($entity_type, $entity, $context['field'], $langcode, TRUE);
 
   if ($context['field']['cardinality'] == 1) {
@@ -533,7 +533,7 @@ function entity_metadata_field_verbatim_set($entity, $name, $items, $langcode, $
 
   // Empty the static field language cache, so the field system picks up any
   // possible new languages.
-  drupal_static_reset('field_language');
+  backdrop_static_reset('field_language');
 }
 
 /**
@@ -551,12 +551,12 @@ function entity_metadata_field_verbatim_set($entity, $name, $items, $langcode, $
  */
 function entity_metadata_field_get_language($entity_type, $entity, $field, $langcode = LANGUAGE_NONE, $fallback = FALSE) {
   // Try to figure out the default language used by the entity.
-  // With Drupal >= 7.15 we can use entity_language().
+  // With Backdrop >= 7.15 we can use entity_language().
   if (function_exists('entity_language')) {
     $default_langcode = entity_language($entity_type, $entity);
   }
   else {
-    $default_langcode = !empty($entity->language) ? $entity->language : LANGUAGE_NONE;
+    $default_langcode = !empty($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
   }
 
   // Determine the right language to use.
@@ -580,7 +580,7 @@ function entity_metadata_field_text_get($item, array $options, $name, $type, $co
   // $name is either 'value' or 'summary'.
   if (!isset($item['safe_' . $name])) {
     // Apply input formats.
-    $langcode = isset($options['language']) ? $options['language']->language : '';
+    $langcode = isset($options['language']) ? $options['language']->langcode : '';
     $format = isset($item['format']) ? $item['format'] : filter_default_format();
     $item['safe_' . $name] = check_markup($item[$name], $format, $langcode);
     // To speed up subsequent calls, update $item with the 'safe_value'.
@@ -961,7 +961,7 @@ function entity_metadata_form_node($node) {
   // Pre-populate the form-state with the right form include.
   $form_state['build_info']['args'] = array($node);
   form_load_include($form_state, 'inc', 'node', 'node.pages');
-  return drupal_build_form($node->type . '_node_form', $form_state);
+  return backdrop_build_form($node->type . '_node_form', $form_state);
 }
 
 /**
@@ -972,7 +972,7 @@ function entity_metadata_form_comment($comment) {
     $node = node_load($comment->nid);
     $comment->node_type = 'comment_node_' . $node->type;
   }
-  return drupal_get_form($comment->node_type . '_form', $comment);
+  return backdrop_get_form($comment->node_type . '_form', $comment);
 }
 
 /**
@@ -989,7 +989,7 @@ function entity_metadata_form_user($account) {
     $form_id = 'user_register_form';
   }
   $form_state['build_info']['args'] = array($account);
-  return drupal_build_form($form_id, $form_state);
+  return backdrop_build_form($form_id, $form_state);
 }
 
 /**
@@ -999,7 +999,7 @@ function entity_metadata_form_taxonomy_term($term) {
   // Pre-populate the form-state with the right form include.
   $form_state['build_info']['args'] = array($term);
   form_load_include($form_state, 'inc', 'taxonomy', 'taxonomy.admin');
-  return drupal_build_form('taxonomy_form_term', $form_state);
+  return backdrop_build_form('taxonomy_form_term', $form_state);
 }
 
 /**
@@ -1009,7 +1009,7 @@ function entity_metadata_form_taxonomy_vocabulary($vocab) {
   // Pre-populate the form-state with the right form include.
   $form_state['build_info']['args'] = array($vocab);
   form_load_include($form_state, 'inc', 'taxonomy', 'taxonomy.admin');
-  return drupal_build_form('taxonomy_form_vocabulary', $form_state);
+  return backdrop_build_form('taxonomy_form_vocabulary', $form_state);
 }
 
 /**
@@ -1021,11 +1021,11 @@ function entity_metadata_form_entity_ui($entity, $entity_type) {
   // Add in the include file as the form API does else with the include file
   // specified for the active menu item.
   if (!empty($info['admin ui']['file'])) {
-    $path = isset($info['admin ui']['file path']) ? $info['admin ui']['file path'] : drupal_get_path('module', $info['module']);
+    $path = isset($info['admin ui']['file path']) ? $info['admin ui']['file path'] : backdrop_get_path('module', $info['module']);
     $form_state['build_info']['files']['entity_ui'] = $path . '/' . $info['admin ui']['file'];
     // Also load the include file.
     if (file_exists($form_state['build_info']['files']['entity_ui'])) {
-      require_once DRUPAL_ROOT . '/' . $form_state['build_info']['files']['entity_ui'];
+      require_once BACKDROP_ROOT . '/' . $form_state['build_info']['files']['entity_ui'];
     }
   }
   return entity_ui_get_form($entity_type, $entity, $op = 'edit', $form_state);

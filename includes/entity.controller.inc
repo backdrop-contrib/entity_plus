@@ -9,7 +9,7 @@
 /**
  * Interface for EntityControllers compatible with the entity API.
  */
-interface EntityAPIControllerInterface extends DrupalEntityControllerInterface {
+interface EntityAPIControllerInterface extends BackdropEntityControllerInterface {
 
   /**
    * Delete permanently saved entities.
@@ -143,7 +143,7 @@ interface EntityAPIControllerRevisionableInterface extends EntityAPIControllerIn
 /**
  * A controller implementing EntityAPIControllerInterface for the database.
  */
-class EntityAPIController extends DrupalDefaultEntityController implements EntityAPIControllerRevisionableInterface {
+class EntityAPIController extends BackdropDefaultEntityController implements EntityAPIControllerRevisionableInterface {
 
   protected $cacheComplete = FALSE;
   protected $bundleKey;
@@ -151,7 +151,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
 
   /**
    * Overridden.
-   * @see DrupalDefaultEntityController#__construct()
+   * @see BackdropDefaultEntityController#__construct()
    */
   public function __construct($entityType) {
     parent::__construct($entityType);
@@ -164,7 +164,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
   }
 
   /**
-   * Overrides DrupalDefaultEntityController::buildQuery().
+   * Overrides BackdropDefaultEntityController::buildQuery().
    */
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);
@@ -193,7 +193,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
 
   /**
    * Overridden.
-   * @see DrupalDefaultEntityController#load($ids, $conditions)
+   * @see BackdropDefaultEntityController#load($ids, $conditions)
    *
    * In contrast to the parent implementation we factor out query execution, so
    * fetching can be further customized easily.
@@ -254,7 +254,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
 
         // For DB-based entities take care of serialized columns.
         if (!empty($this->entityInfo['base table'])) {
-          $schema = drupal_get_schema($this->entityInfo['base table']);
+          $schema = backdrop_get_schema($this->entityInfo['base table']);
 
           foreach ($schema['fields'] as $field => $info) {
             if (!empty($info['serialize']) && isset($record->$field)) {
@@ -311,7 +311,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
   }
 
   /**
-   * Overrides DrupalDefaultEntityController::resetCache().
+   * Overrides BackdropDefaultEntityController::resetCache().
    */
   public function resetCache(array $ids = NULL) {
     $this->cacheComplete = FALSE;
@@ -443,7 +443,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
       $this->invoke('presave', $entity);
 
       if ($entity->is_new) {
-        $return = drupal_write_record($this->entityInfo['base table'], $entity);
+        $return = backdrop_write_record($this->entityInfo['base table'], $entity);
         if ($this->revisionKey) {
           $this->saveRevision($entity);
         }
@@ -453,7 +453,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
         // Update the base table if the entity doesn't have revisions or
         // we are updating the default revision.
         if (!$this->revisionKey || !empty($entity->{$this->defaultRevisionKey})) {
-          $return = drupal_write_record($this->entityInfo['base table'], $entity, $this->idKey);
+          $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
         }
         if ($this->revisionKey) {
           $return = $this->saveRevision($entity);
@@ -510,11 +510,11 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
     }
 
     if ($entity->is_new_revision) {
-      drupal_write_record($this->revisionTable, $record);
+      backdrop_write_record($this->revisionTable, $record);
       $update_default_revision = $entity->{$this->defaultRevisionKey};
     }
     else {
-      drupal_write_record($this->revisionTable, $record, $this->revisionKey);
+      backdrop_write_record($this->revisionTable, $record, $this->revisionKey);
       // @todo: Fix original entity to be of the same revision and check whether
       // the default revision key has been set.
       $update_default_revision = $entity->{$this->defaultRevisionKey} && $entity->{$this->revisionKey} != $entity->original->{$this->revisionKey};
@@ -563,7 +563,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
    *   A serialized string in JSON format as produced by the export() method.
    */
   public function import($export) {
-    $vars = drupal_json_decode($export);
+    $vars = backdrop_json_decode($export);
     if (is_array($vars)) {
       return $this->create($vars);
     }
@@ -588,7 +588,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
       'entity' => $entity,
       'langcode' => $langcode,
     );
-    drupal_alter('entity_view_mode', $view_mode, $context);
+    backdrop_alter('entity_view_mode', $view_mode, $context);
     // Make sure the used view-mode gets stored.
     $entity->content += array('#view_mode' => $view_mode);
 
@@ -642,7 +642,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
       '#access' => $property->access('view'),
       '#entity_type' => $this->entityType,
     );
-    $content['#attached']['css']['entity.theme'] = drupal_get_path('module', 'entity') . '/theme/entity.theme.css';
+    $content['#attached']['css']['entity.theme'] = backdrop_get_path('module', 'entity') . '/theme/entity.theme.css';
   }
 
   /**
@@ -673,7 +673,7 @@ class EntityAPIController extends DrupalDefaultEntityController implements Entit
         '#page' => $page,
       );
       // Allow modules to modify the structured entity.
-      drupal_alter(array($this->entityType . '_view', 'entity_view'), $build, $this->entityType);
+      backdrop_alter(array($this->entityType . '_view', 'entity_view'), $build, $this->entityType);
       $key = isset($entity->{$this->idKey}) ? $entity->{$this->idKey} : NULL;
       $view[$this->entityType][$key] = $build;
     }
@@ -766,7 +766,7 @@ class EntityAPIControllerExportable extends EntityAPIController {
 
   /**
    * Overridden.
-   * @see DrupalDefaultEntityController::cacheGet()
+   * @see BackdropDefaultEntityController::cacheGet()
    */
   protected function cacheGet($ids, $conditions = array()) {
     if (!empty($this->entityCache) && $ids !== array()) {
@@ -813,7 +813,7 @@ class EntityAPIControllerExportable extends EntityAPIController {
 
   /**
    * Overridden.
-   * @see DrupalDefaultEntityController::cacheSet()
+   * @see BackdropDefaultEntityController::cacheSet()
    */
   protected function cacheSet($entities) {
     $this->entityCache += $entities;
@@ -825,7 +825,7 @@ class EntityAPIControllerExportable extends EntityAPIController {
 
   /**
    * Overridden.
-   * @see DrupalDefaultEntityController::attachLoad()
+   * @see BackdropDefaultEntityController::attachLoad()
    *
    * Changed to call type-specific hook with the entities keyed by name if they
    * have one.

@@ -68,7 +68,7 @@ function entity_metadata_system_entity_property_info() {
     'property info' => array(
       'path' => array(
         'label' => t("Path"),
-        'description' => t("The internal Drupal path of the current page request."),
+        'description' => t("The internal Backdrop path of the current page request."),
         'getter callback' => 'current_path',
         'type' => 'text',
       ),

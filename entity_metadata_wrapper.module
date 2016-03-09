@@ -1,0 +1,447 @@
+<?php
+/**
+ * @file
+ * Returns a property wrapper for given data.
+ */
+
+module_load_include('inc', 'entity_metadata_wrapper', 'modules/callbacks');
+module_load_include('inc', 'entity_metadata_wrapper', 'includes/entity.property');
+
+function entity_metadata_wrapper($type, $data = NULL, array $info = array()) {
+  if ($type == 'entity' || (($entity_info = entity_get_info()) && isset($entity_info[$type]))) {
+    // If the passed entity is the global $user, we load the user object by only
+    // passing on the user id. The global user is not a fully loaded entity.
+    if ($type == 'user' && is_object($data) && $data == $GLOBALS['user']) {
+      $data = $data->uid;
+    }
+    return new EntityBackdropWrapper($type, $data, $info);
+  }
+  elseif ($type == 'list' || entity_property_list_extract_type($type)) {
+    return new EntityListWrapper($type, $data, $info);
+  }
+  elseif (isset($info['property info'])) {
+    return new EntityStructureWrapper($type, $data, $info);
+  }
+  else {
+    return new EntityValueWrapper($type, $data, $info);
+  }
+}
+
+/**
+ * Returns a property wrapper for the given data.
+ *
+ * Short version of entity_metadata_wrapper().
+ *
+ * @return EntityMetadataWrapper
+ *   Dependend on the passed data the right wrapper is returned.
+ *  
+ * @see entity_metadata_wrapper()
+ */
+function emw($type, $data = NULL, array $info = array()) {
+  return entity_metadata_wrapper($type, $data, $info);
+}
+
+function entity_metadata_wrapper_autoload_info() {
+  return array(
+    'EntityValueWrapper' => 'includes/entity.wrapper.inc',
+    'EntityStructureWrapper' => 'includes/entity.wrapper.inc',
+    'EntityListWrapper' => 'includes/entity.wrapper.inc',
+    'EntityBackdropWrapper' => 'includes/entity.wrapper.inc',
+    'EntityMetadataWrapper' => 'includes/entity.wrapper.inc',
+    'EntityMetadataWrapperException' => 'includes/entity.wrapper.inc',
+    'EntityMetadataWrapperIterator' => 'includes/entity.wrapper.inc',
+    'EntityMetadataArrayObject' => 'includes/entity.wrapper.inc',
+    'EntityDefaultMetadataController' => 'includes/entity.wrapper.inc',
+    'EntityExtraFieldsControllerInterface' => 'includes/entity.wrapper.inc',
+    'EntityDefaultExtraFieldsController' => 'includes/entity.wrapper.inc',
+    'EntityAPIControllerInterface' => 'includes/entity.controller.inc',
+    'EntityAPIControllerRevisionableInterface' => 'includes/entity.controller.inc',
+    'EntityAPIController' => 'includes/entity.controller.inc',
+    'EntityAPIControllerExportable' => 'includes/entity.controller.inc',
+    'EntityAPIControllerInterface' => 'includes/entity.controller.inc',
+    'EntityAPIControllerInterface' => 'includes/entity.controller.inc',
+  );
+}
+
+function entity_metadata_wrapper_get_property_info($entity_type = NULL) {
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['info'] = &backdrop_static(__FUNCTION__);
+  }
+  $info = &$backdrop_static_fast['info'];
+
+  // hook_entity_property_info() includes translated strings, so each language
+  // is cached separately.
+  $langcode = $GLOBALS['language']->langcode;
+
+  if (empty($info)) {
+    if ($cache = cache_get("entity_property_info:$langcode")) {
+      $info = $cache->data;
+    }
+    else {
+      $info = module_invoke_all('entity_property_info');
+      // Let other modules alter the entity info.
+      backdrop_alter('entity_property_info', $info);
+      cache_set("entity_property_info:$langcode", $info);
+    }
+  }
+  return empty($entity_type) ? $info : (isset($info[$entity_type]) ? $info[$entity_type] : array());
+}
+
+/**
+ * Implements hook_entity_property_info().
+ */
+function entity_metadata_wrapper_entity_property_info() {
+  $items = array();
+  // Add in info about entities provided by the CRUD API.
+  foreach (entity_crud_get_info() as $type => $info) {
+    // Automatically enable the controller only if the module does not implement
+    // the hook itself.
+    if (!isset($info['metadata controller class']) && !empty($info['base table']) && (!isset($info['module']) || !module_hook($info['module'], 'entity_property_info'))) {
+      $info['metadata controller class'] = 'EntityDefaultMetadataController';
+    }
+    if (!empty($info['metadata controller class'])) {
+      $controller = new $info['metadata controller class']($type);
+      $items += $controller->entityPropertyInfo();
+    }
+  }
+  // Add in info for all core entities.
+  foreach (_entity_metadata_core_modules() as $module) {
+    module_load_include('inc', 'entity_metadata_wrapper', "modules/$module.info");
+    if (function_exists($function = "entity_metadata_{$module}_entity_property_info")) {
+      if ($return = $function()) {
+        $items = array_merge_recursive($items, $return);
+      }
+    }
+  }
+  return $items;
+}
+
+/**
+ * Returns the entity identifier, i.e. the entities name or numeric id.
+ *
+ * Unlike entity_extract_ids() this function returns the name of the entity
+ * instead of the numeric id, in case the entity type has specified a name key.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $entity
+ *   An entity object.
+ *
+ * @see entity_extract_ids()
+ */
+function entity_id($entity_type, $entity) {
+  if (method_exists($entity, 'identifier')) {
+    return $entity->identifier();
+  }
+  $info = entity_get_info($entity_type);
+  $key = isset($info['entity keys']['name']) ? $info['entity keys']['name'] : $info['entity keys']['id'];
+  return isset($entity->$key) ? $entity->$key : NULL;
+}
+
+/**
+ * Get the entity info for the entity types provided via the entity CRUD API.
+ *
+ * @return
+ *  An array in the same format as entity_get_info(), containing the entities
+ *  whose controller class implements the EntityAPIControllerInterface.
+ */
+function entity_crud_get_info() {
+  $types = array();
+  foreach (entity_get_info() as $type => $info) {
+    if (isset($info['controller class']) && in_array('EntityAPIControllerInterface', class_implements($info['controller class']))) {
+      $types[$type] = $info;
+    }
+  }
+  return $types;
+}
+
+function _entity_metadata_core_modules() {
+  return array_filter(array('book', 'comment', 'field', 'locale', 'node', 'taxonomy', 'user', 'system', 'statistics'), 'module_exists');
+}
+
+/**
+ * Determines whether for the given entity type a given operation is available.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $op
+ *   One of 'create', 'view', 'save', 'delete', 'revision delete', 'access' or
+ *   'form'.
+ *
+ * @return boolean
+ *   Whether the entity type supports the given operation.
+ */
+function entity_type_supports($entity_type, $op) {
+  $info = entity_get_info($entity_type);
+  $keys = array(
+    'view' => 'view callback',
+    'create' => 'creation callback',
+    'delete' => 'deletion callback',
+    'revision delete' => 'revision deletion callback',
+    'save' => 'save callback',
+    'access' => 'access callback',
+    'form' => 'form callback'
+  );
+  if (isset($info[$keys[$op]])) {
+    return TRUE;
+  }
+  if ($op == 'revision delete') {
+    return in_array('EntityAPIControllerInterface', class_implements($info['controller class']));
+  }
+  if ($op == 'form') {
+    return (bool) entity_ui_controller($entity_type);
+  }
+  if ($op != 'access') {
+    return in_array('EntityAPIControllerInterface', class_implements($info['controller class']));
+  }
+  return FALSE;
+}
+
+/**
+ * Implements hook_entity_info_alter().
+ *
+ * @see entity_module_implements_alter()
+ */
+function entity_metadata_wrapper_entity_info_alter(&$entity_info) {
+  _entity_info_add_metadata($entity_info);
+
+  // Populate a default value for the 'configuration' key of all entity types.
+  foreach ($entity_info as $type => $info) {
+    if (!isset($info['configuration'])) {
+      $entity_info[$type]['configuration'] = !empty($info['exportable']);
+    }
+
+    if (isset($info['controller class']) && in_array('EntityAPIControllerInterface', class_implements($info['controller class']))) {
+      // Automatically disable field cache when entity cache is used.
+      if (!empty($info['entity cache']) && module_exists('entitycache')) {
+        $entity_info[$type]['field cache'] = FALSE;
+      }
+    }
+  }
+}
+
+/**
+ * Adds metadata and callbacks for core entities to the entity info.
+ */
+function _entity_info_add_metadata(&$entity_info) {
+  // Set plural labels.
+  $entity_info['node']['plural label'] = t('Nodes');
+  $entity_info['user']['plural label'] = t('Users');
+  $entity_info['file']['plural label'] = t('Files');
+
+  // Set descriptions.
+  $entity_info['node']['description'] = t('Nodes represent the main site content items.');
+  $entity_info['user']['description'] = t('Users who have created accounts on your site.');
+  $entity_info['file']['description'] = t('Uploaded file.');
+
+  // Set access callbacks.
+  $entity_info['node']['access callback'] = 'entity_metadata_no_hook_node_access';
+  $entity_info['user']['access callback'] = 'entity_metadata_user_access';
+  // File entity has it's own entity_access function.
+  if (!module_exists('file_entity')) {
+    $entity_info['file']['access callback'] = 'entity_metadata_file_access';
+  }
+
+  // CRUD function callbacks.
+  $entity_info['node']['creation callback'] = 'entity_metadata_create_node';
+  $entity_info['node']['save callback'] = 'node_save';
+  $entity_info['node']['deletion callback'] = 'node_delete';
+  $entity_info['node']['revision deletion callback'] = 'node_revision_delete';
+  $entity_info['user']['creation callback'] = 'entity_metadata_create_object';
+  $entity_info['user']['save callback'] = 'entity_metadata_user_save';
+  $entity_info['user']['deletion callback'] = 'user_delete';
+  $entity_info['file']['save callback'] = 'file_save';
+  $entity_info['file']['deletion callback'] = 'entity_metadata_delete_file';
+
+  // Form callbacks.
+  $entity_info['node']['form callback'] = 'entity_metadata_form_node';
+  $entity_info['user']['form callback'] = 'entity_metadata_form_user';
+
+  // URI callbacks.
+  if (!isset($entity_info['file']['uri callback'])) {
+    $entity_info['file']['uri callback'] = 'entity_metadata_uri_file';
+  }
+
+  // View callbacks.
+  $entity_info['node']['view callback'] = 'entity_metadata_view_node';
+  $entity_info['user']['view callback'] = 'entity_metadata_view_single';
+
+  if (module_exists('comment')) {
+    $entity_info['comment']['plural label'] = t('Comments');
+    $entity_info['comment']['description'] = t('Remark or note that refers to a node.');
+    $entity_info['comment']['access callback'] = 'entity_metadata_comment_access';
+    $entity_info['comment']['creation callback'] = 'entity_metadata_create_comment';
+    $entity_info['comment']['save callback'] = 'comment_save';
+    $entity_info['comment']['deletion callback'] = 'comment_delete';
+    $entity_info['comment']['view callback'] = 'entity_metadata_view_comment';
+    $entity_info['comment']['form callback'] = 'entity_metadata_form_comment';
+  }
+  if (module_exists('taxonomy')) {
+    $entity_info['taxonomy_term']['plural label'] = t('Taxonomy terms');
+    $entity_info['taxonomy_term']['description'] = t('Taxonomy terms are used for classifying content.');
+    $entity_info['taxonomy_term']['access callback'] = 'entity_metadata_taxonomy_access';
+    $entity_info['taxonomy_term']['creation callback'] = 'entity_metadata_create_object';
+    $entity_info['taxonomy_term']['save callback'] = 'taxonomy_term_save';
+    $entity_info['taxonomy_term']['deletion callback'] = 'taxonomy_term_delete';
+    $entity_info['taxonomy_term']['view callback'] = 'entity_metadata_view_single';
+    $entity_info['taxonomy_term']['form callback'] = 'entity_metadata_form_taxonomy_term';
+
+    if (isset($entity_info['taxonomy_vocabulary'])) {
+      $entity_info['taxonomy_vocabulary']['plural label'] = t('Taxonomy vocabularies');
+      $entity_info['taxonomy_vocabulary']['description'] = t('Vocabularies contain related taxonomy terms, which are used for classifying content.');
+      $entity_info['taxonomy_vocabulary']['access callback'] = 'entity_metadata_taxonomy_access';
+      $entity_info['taxonomy_vocabulary']['creation callback'] = 'entity_metadata_create_object';
+      $entity_info['taxonomy_vocabulary']['save callback'] = 'taxonomy_vocabulary_save';
+      $entity_info['taxonomy_vocabulary']['deletion callback'] = 'taxonomy_vocabulary_delete';
+      $entity_info['taxonomy_vocabulary']['form callback'] = 'entity_metadata_form_taxonomy_vocabulary';
+      $entity_info['taxonomy_vocabulary']['token type'] = 'vocabulary';
+    }
+    // Token type mapping.
+    $entity_info['taxonomy_term']['token type'] = 'term';
+  }
+}
+
+/**
+ * Generate an array for rendering the given entities.
+ *
+ * Entities being viewed, are generally expected to be fully-loaded entity
+ * objects, thus have their name or id key set. However, it is possible to
+ * view a single entity without any id, e.g. for generating a preview during
+ * creation.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $entities
+ *   An array of entities to render.
+ * @param $view_mode
+ *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
+ * @param $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ * @param $page
+ *   (optional) If set will control if the entity is rendered: if TRUE
+ *   the entity will be rendered without its title, so that it can be embeded
+ *   in another context. If FALSE the entity will be displayed with its title
+ *   in a mode suitable for lists.
+ *   If unset, the page mode will be enabled if the current path is the URI
+ *   of the entity, as returned by entity_uri().
+ *   This parameter is only supported for entities which controller is a
+ *   EntityAPIControllerInterface.
+ * @return
+ *   The renderable array, keyed by the entity type and by entity identifiers,
+ *   for which the entity name is used if existing - see entity_id(). If there
+ *   is no information on how to view an entity, FALSE is returned.
+ */
+function entity_view($entity_type, $entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+  $info = entity_get_info($entity_type);
+  if (isset($info['view callback'])) {
+    $entities = entity_key_array_by_property($entities, $info['entity keys']['id']);
+    return $info['view callback']($entities, $view_mode, $langcode, $entity_type);
+  }
+  elseif (in_array('EntityAPIControllerInterface', class_implements($info['controller class']))) {
+    return entity_get_controller($entity_type)->view($entities, $view_mode, $langcode, $page);
+  }
+  return FALSE;
+}
+
+/**
+ * Determines whether the given user can perform actions on an entity.
+ *
+ * For create operations, the pattern is to create an entity and then
+ * check if the user has create access.
+ *
+ * @code
+ * $node = entity_create('node', array('type' => 'page'));
+ * $access = entity_access('create', 'node', $node, $account);
+ * @endcode
+ *
+ * @param $op
+ *   The operation being performed. One of 'view', 'update', 'create' or
+ *   'delete'.
+ * @param $entity_type
+ *   The entity type of the entity to check for.
+ * @param $entity
+ *   Optionally an entity to check access for. If no entity is given, it will be
+ *   determined whether access is allowed for all entities of the given type.
+ * @param $account
+ *   The user to check for. Leave it to NULL to check for the global user.
+ *
+ * @return boolean
+ *   Whether access is allowed or not. If the entity type does not specify any
+ *   access information, NULL is returned.
+ *
+ * @see entity_type_supports()
+ */
+function entity_access($op, $entity_type, $entity = NULL, $account = NULL) {
+  if (($info = entity_get_info()) && isset($info[$entity_type]['access callback'])) {
+    return $info[$entity_type]['access callback']($op, $entity, $account, $entity_type);
+  }
+}
+
+/**
+ * Converts the schema information available for the given table to property info.
+ *
+ * @param $table
+ *   The name of the table as used in hook_schema().
+ * @return
+ *   An array of property info as suiting for hook_entity_property_info().
+ */
+function entity_metadata_convert_schema($table) {
+  $schema = backdrop_get_schema($table);
+  $properties = array();
+  foreach ($schema['fields'] as $name => $info) {
+    if ($type = _entity_metadata_convert_schema_type($info['type'])) {
+      $properties[$name] = array(
+        'type' => $type,
+        'label' => backdrop_ucfirst($name),
+        'schema field' => $name,
+        // As we cannot know about any setter access, leave out the setter
+        // callback. For getting usually no further access callback is needed.
+      );
+      if ($info['type'] == 'serial') {
+        $properties[$name]['validation callback'] = 'entity_metadata_validate_integer_positive';
+      }
+    }
+  }
+  return $properties;
+}
+
+function _entity_metadata_convert_schema_type($type) {
+  switch ($type) {
+    case 'int':
+    case 'serial':
+    case 'date':
+      return 'integer';
+    case 'float':
+    case 'numeric':
+      return 'decimal';
+    case 'char':
+    case 'varchar':
+    case 'text':
+      return 'text';
+  }
+}
+
+
+/**
+ * Converts an array of entities to be keyed by the values of a given property.
+ *
+ * @param array $entities
+ *   The array of entities to convert.
+ * @param $property
+ *   The name of entity property, by which the array should be keyed. To get
+ *   reasonable results, the property has to have unique values.
+ *
+ * @return array
+ *   The same entities in the same order, but keyed by their $property values.
+ */
+function entity_key_array_by_property(array $entities, $property) {
+  $ret = array();
+  foreach ($entities as $entity) {
+    $key = isset($entity->$property) ? $entity->$property : NULL;
+    $ret[$key] = $entity;
+  }
+  return $ret;
+}

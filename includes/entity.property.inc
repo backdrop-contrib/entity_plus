@@ -18,16 +18,16 @@
  * @see hook_entity_property_info_alter()
  */
 function entity_get_property_info($entity_type = NULL) {
-  // Use the advanced drupal_static() pattern, since this is called very often.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
-    $drupal_static_fast['info'] = &drupal_static(__FUNCTION__);
+  // Use the advanced backdrop_static() pattern, since this is called very often.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['info'] = &backdrop_static(__FUNCTION__);
   }
-  $info = &$drupal_static_fast['info'];
+  $info = &$backdrop_static_fast['info'];
 
   // hook_entity_property_info() includes translated strings, so each language
   // is cached separately.
-  $langcode = $GLOBALS['language']->language;
+  $langcode = $GLOBALS['language']->langcode;
 
   if (empty($info)) {
     if ($cache = cache_get("entity_property_info:$langcode")) {
@@ -36,10 +36,11 @@ function entity_get_property_info($entity_type = NULL) {
     else {
       $info = module_invoke_all('entity_property_info');
       // Let other modules alter the entity info.
-      drupal_alter('entity_property_info', $info);
+      backdrop_alter('entity_property_info', $info);
       cache_set("entity_property_info:$langcode", $info);
     }
   }
+
   return empty($entity_type) ? $info : (isset($info[$entity_type]) ? $info[$entity_type] : array());
 }
 
@@ -141,7 +142,7 @@ function entity_property_query($entity_type, $property, $value, $limit = 30) {
  * Resets the cached information of hook_entity_property_info().
  */
 function entity_property_info_cache_clear() {
-  drupal_static_reset('entity_get_property_info');
+  backdrop_static_reset('entity_get_property_info');
   // Clear all languages.
   cache_clear_all('entity_property_info:', 'cache', TRUE);
 }
@@ -237,13 +238,13 @@ function entity_field_update_instance() {
 function entity_property_verify_data_type($data, $type) {
   // As this may be called very often statically cache the entity info using
   // the fast pattern.
-  static $drupal_static_fast;
-  if (!isset($drupal_static_fast)) {
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
     // Make use of the same static as entity info.
     entity_get_info();
-    $drupal_static_fast['entity_info'] = &drupal_static('entity_get_info');
+    $backdrop_static_fast['entity_info'] = &backdrop_static('entity_get_info');
   }
-  $info = &$drupal_static_fast['entity_info'];
+  $info = &$backdrop_static_fast['entity_info'];
 
   // First off check for entities, which may be represented by their ids too.
   if (isset($info[$type])) {
@@ -281,7 +282,7 @@ function entity_property_verify_data_type($data, $type) {
     case 'list':
       return (is_array($data) && array_values($data) == $data) || (is_object($data) && $data instanceof EntityMetadataArrayObject);
     case 'entity':
-      return is_object($data) && $data instanceof EntityDrupalWrapper;
+      return is_object($data) && $data instanceof EntityBackdropWrapper;
     default:
     case 'struct':
       return is_object($data) || is_array($data);
@@ -301,8 +302,8 @@ function entity_property_verify_data_type($data, $type) {
  *   assigned to the entity directly, without the use of the metadata-wrapper
  *   property.
  *
- * @return EntityDrupalWrapper
- *   An EntityDrupalWrapper wrapping the newly created entity or FALSE, if
+ * @return EntityBackdropWrapper
+ *   An EntityBackdropWrapper wrapping the newly created entity or FALSE, if
  *   there were no information how to create the entity.
  */
 function entity_property_values_create_entity($entity_type, $values = array()) {
@@ -333,7 +334,7 @@ function entity_property_values_create_entity($entity_type, $values = array()) {
         }
       }
     }
-    // @todo: Once we require Drupal 7.7 or later, verify the entity has
+    // @todo: Once we require Backdrop 7.7 or later, verify the entity has
     // now a valid bundle and throw the EntityMalformedException if not.
     return $wrapper;
   }
@@ -382,7 +383,7 @@ function entity_property_verbatim_get($data, array $options, $name, $type, $info
     // Incorporate i18n_string translations. We may rely on the entity class
     // here as its usage is required by the i18n integration.
     if (isset($options['language']) && !empty($info['i18n string'])) {
-      return $data->getTranslation($name, $options['language']->language);
+      return $data->getTranslation($name, $options['language']->langcode);
     }
     else {
       return $data->$name;

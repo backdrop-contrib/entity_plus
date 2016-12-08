@@ -9,7 +9,7 @@
 /**
  * Interface for EntityControllers compatible with the entity API.
  */
-interface EntityAPIControllerInterface extends BackdropEntityControllerInterface {
+interface EMWControllerInterface extends EntityControllerInterface {
 
   /**
    * Delete permanently saved entities.
@@ -113,7 +113,7 @@ interface EntityAPIControllerInterface extends BackdropEntityControllerInterface
    *   If unset, the page mode will be enabled if the current path is the URI
    *   of the entity, as returned by entity_uri().
    *   This parameter is only supported for entities which controller is a
-   *   EntityAPIControllerInterface.
+   *   EMWControllerInterface.
    * @return
    *   The renderable array, keyed by entity name or numeric id.
    */
@@ -123,7 +123,7 @@ interface EntityAPIControllerInterface extends BackdropEntityControllerInterface
 /**
  * Interface for EntityControllers of entities that support revisions.
  */
-interface EntityAPIControllerRevisionableInterface extends EntityAPIControllerInterface {
+interface EMWControllerRevisionableInterface extends EMWControllerInterface {
 
   /**
    * Delete an entity revision.
@@ -141,9 +141,9 @@ interface EntityAPIControllerRevisionableInterface extends EntityAPIControllerIn
 }
 
 /**
- * A controller implementing EntityAPIControllerInterface for the database.
+ * A controller implementing EMWControllerInterface for the database.
  */
-class EntityAPIController extends BackdropDefaultEntityController implements EntityAPIControllerRevisionableInterface {
+class EMWController extends DefaultEntityController implements EMWControllerRevisionableInterface {
 
   protected $cacheComplete = FALSE;
   protected $bundleKey;
@@ -323,7 +323,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    */
   public function invoke($hook, $entity) {
     // entity_revision_delete() invokes hook_entity_revision_delete() and
@@ -361,7 +361,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    *
    * @param $transaction
    *   Optionally a DatabaseTransaction object to use. Allows overrides to pass
@@ -404,7 +404,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerRevisionableInterface::deleteRevision().
+   * Implements EMWControllerRevisionableInterface::deleteRevision().
    */
   public function deleteRevision($revision_id) {
     if ($entity_revision = entity_revision_load($this->entityType, $revision_id)) {
@@ -424,7 +424,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    *
    * @param $transaction
    *   Optionally a DatabaseTransaction object to use. Allows overrides to pass
@@ -533,7 +533,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    */
   public function create(array $values = array()) {
     // Add is_new property if it is not set.
@@ -545,7 +545,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    *
    * @return
    *   A serialized string in JSON format suitable for the import() method.
@@ -557,7 +557,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    *
    * @param $export
    *   A serialized string in JSON format as produced by the export() method.
@@ -571,7 +571,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    *
    * @param $content
    *   Optionally. Allows pre-populating the built content to ease overridding
@@ -646,7 +646,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    */
   public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     // For Field API and entity_prepare_view, the entities have to be keyed by
@@ -684,7 +684,7 @@ class EntityAPIController extends BackdropDefaultEntityController implements Ent
 /**
  * A controller implementing exportables stored in the database.
  */
-class EntityAPIControllerExportable extends EntityAPIController {
+class EMWControllerExportable extends EMWController {
 
   protected $entityCacheByName = array();
   protected $nameKey, $statusKey, $moduleKey;
@@ -962,7 +962,7 @@ class EntityAPIControllerExportable extends EntityAPIController {
   }
 
   /**
-   * Implements EntityAPIControllerInterface.
+   * Implements EMWControllerInterface.
    */
   public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     $view = parent::view($entities, $view_mode, $langcode, $page);

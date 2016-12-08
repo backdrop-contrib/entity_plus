@@ -54,12 +54,12 @@ function entity_metadata_wrapper_autoload_info() {
     'EntityDefaultMetadataController' => 'includes/entity.wrapper.inc',
     'EntityExtraFieldsControllerInterface' => 'includes/entity.wrapper.inc',
     'EntityDefaultExtraFieldsController' => 'includes/entity.wrapper.inc',
-    'EntityAPIControllerInterface' => 'includes/entity.controller.inc',
-    'EntityAPIControllerRevisionableInterface' => 'includes/entity.controller.inc',
-    'EntityAPIController' => 'includes/entity.controller.inc',
-    'EntityAPIControllerExportable' => 'includes/entity.controller.inc',
-    'EntityAPIControllerInterface' => 'includes/entity.controller.inc',
-    'EntityAPIControllerInterface' => 'includes/entity.controller.inc',
+    'EMWControllerInterface' => 'includes/entity.controller.inc',
+    'EMWControllerRevisionableInterface' => 'includes/entity.controller.inc',
+    'EMWController' => 'includes/entity.controller.inc',
+    'EMWControllerExportable' => 'includes/entity.controller.inc',
+    'EMWControllerInterface' => 'includes/entity.controller.inc',
+    'EMWControllerInterface' => 'includes/entity.controller.inc',
   );
 }
 
@@ -145,12 +145,12 @@ function entity_id($entity_type, $entity) {
  *
  * @return
  *  An array in the same format as entity_get_info(), containing the entities
- *  whose controller class implements the EntityAPIControllerInterface.
+ *  whose controller class implements the EMWControllerInterface.
  */
 function entity_crud_get_info() {
   $types = array();
   foreach (entity_get_info() as $type => $info) {
-    if (isset($info['controller class']) && in_array('EntityAPIControllerInterface', class_implements($info['controller class']))) {
+    if (isset($info['controller class']) && in_array('EMWControllerInterface', class_implements($info['controller class']))) {
       $types[$type] = $info;
     }
   }
@@ -188,13 +188,13 @@ function entity_type_supports($entity_type, $op) {
     return TRUE;
   }
   if ($op == 'revision delete') {
-    return in_array('EntityAPIControllerInterface', class_implements($info['controller class']));
+    return in_array('EMWControllerInterface', class_implements($info['controller class']));
   }
   if ($op == 'form') {
     return (bool) entity_ui_controller($entity_type);
   }
   if ($op != 'access') {
-    return in_array('EntityAPIControllerInterface', class_implements($info['controller class']));
+    return in_array('EMWControllerInterface', class_implements($info['controller class']));
   }
   return FALSE;
 }
@@ -213,7 +213,7 @@ function entity_metadata_wrapper_entity_info_alter(&$entity_info) {
       $entity_info[$type]['configuration'] = !empty($info['exportable']);
     }
 
-    if (isset($info['controller class']) && in_array('EntityAPIControllerInterface', class_implements($info['controller class']))) {
+    if (isset($info['controller class']) && in_array('EMWControllerInterface', class_implements($info['controller class']))) {
       // Automatically disable field cache when entity cache is used.
       if (!empty($info['entity cache']) && module_exists('entitycache')) {
         $entity_info[$type]['field cache'] = FALSE;
@@ -328,7 +328,7 @@ function _entity_info_add_metadata(&$entity_info) {
  *   If unset, the page mode will be enabled if the current path is the URI
  *   of the entity, as returned by entity_uri().
  *   This parameter is only supported for entities which controller is a
- *   EntityAPIControllerInterface.
+ *   EMWControllerInterface.
  * @return
  *   The renderable array, keyed by the entity type and by entity identifiers,
  *   for which the entity name is used if existing - see entity_id(). If there
@@ -340,7 +340,7 @@ function entity_view($entity_type, $entities, $view_mode = 'full', $langcode = N
     $entities = entity_key_array_by_property($entities, $info['entity keys']['id']);
     return $info['view callback']($entities, $view_mode, $langcode, $entity_type);
   }
-  elseif (in_array('EntityAPIControllerInterface', class_implements($info['controller class']))) {
+  elseif (in_array('EMWControllerInterface', class_implements($info['controller class']))) {
     return entity_get_controller($entity_type)->view($entities, $view_mode, $langcode, $page);
   }
   return FALSE;

@@ -1312,7 +1312,7 @@ class EntityDefaultMetadataController {
  * Interface for extra fields controller.
  *
  * Note: Displays extra fields exposed by this controller are rendered by
- * default by the EntityAPIController.
+ * default by the EMWController.
  */
 interface EntityExtraFieldsControllerInterface {
 

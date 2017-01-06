@@ -445,3 +445,34 @@ function entity_key_array_by_property(array $entities, $property) {
   }
   return $ret;
 }
+
+/**
+ * Builds a structured array representing the entity's content.
+ *
+ * The content built for the entity will vary depending on the $view_mode
+ * parameter.
+ *
+ * Note: Currently, this only works for entity types provided with the entity
+ * CRUD API.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $entity
+ *   An entity object.
+ * @param $view_mode
+ *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
+ * @param $langcode
+ *   (optional) A language code to use for rendering. Defaults to the global
+ *   content language of the current request.
+ * @return
+ *   The renderable array.
+ */
+function entity_build_content($entity_type, $entity, $view_mode = 'full', $langcode = NULL) {
+  $info = entity_get_info($entity_type);
+  if (method_exists($entity, 'buildContent')) {
+    return $entity->buildContent($view_mode, $langcode);
+  }
+  elseif (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
+    return entity_get_controller($entity_type)->buildContent($entity, $view_mode, $langcode);
+  }
+}

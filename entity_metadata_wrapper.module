@@ -476,3 +476,302 @@ function entity_build_content($entity_type, $entity, $view_mode = 'full', $langc
     return entity_get_controller($entity_type)->buildContent($entity, $view_mode, $langcode);
   }
 }
+
+/**
+ * Menu loader function: load an entity from its path.
+ *
+ * This can be used to load entities of all types in menu paths:
+ *
+ * @code
+ * $items['myentity/%entity_object'] = array(
+ *   'load arguments' => array('myentity'),
+ *   'title' => ...,
+ *   'page callback' => ...,
+ *   'page arguments' => array(...),
+ *   'access arguments' => array(...),
+ * );
+ * @endcode
+ *
+ * @param $entity_id
+ *   The ID of the entity to load, passed by the menu URL.
+ * @param $entity_type
+ *   The type of the entity to load.
+ * @return
+ *   A fully loaded entity object, or FALSE in case of error.
+ */
+function entity_object_load($entity_id, $entity_type) {
+  $entities = entity_load($entity_type, array($entity_id));
+  return reset($entities);
+}
+
+/**
+ * A wrapper around entity_load() to return entities keyed by name key if existing.
+ *
+ * @param $entity_type
+ *   The entity type to load, e.g. node or user.
+ * @param $names
+ *   An array of entity names or ids, or FALSE to load all entities.
+ * @param $conditions
+ *   (deprecated) An associative array of conditions on the base table, where
+ *   the keys are the database fields and the values are the values those
+ *   fields must have. Instead, it is preferable to use EntityFieldQuery to
+ *   retrieve a list of entity IDs loadable by this function.
+ *
+ * @return
+ *   An array of entity objects indexed by their names (or ids if the entity
+ *   type has no name key).
+ *
+ * @see entity_load()
+ */
+function entity_load_multiple_by_name($entity_type, $names = FALSE, $conditions = array()) {
+  $entities = entity_load($entity_type, $names, $conditions);
+  $info = entity_get_info($entity_type);
+  if (!isset($info['entity keys']['name'])) {
+    return $entities;
+  }
+  return entity_key_array_by_property($entities, $info['entity keys']['name']);
+}
+
+/**
+ * Loads an entity revision.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $revision_id
+ *   The id of the revision to load.
+ *
+ * @return
+ *   The entity object, or FALSE if there is no entity with the given revision
+ *   id.
+ */
+function entity_revision_load($entity_type, $revision_id) {
+  $info = entity_get_info($entity_type);
+  if (!empty($info['entity keys']['revision'])) {
+    $entity_revisions = entity_load($entity_type, FALSE, array($info['entity keys']['revision'] => $revision_id));
+    return reset($entity_revisions);
+  }
+  return FALSE;
+}
+
+/**
+ * Checks if a given entity has a certain exportable status.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $entity
+ *   The entity to check the status on.
+ * @param $status
+ *   The constant status like ENTITY_CUSTOM, ENTITY_IN_CODE, ENTITY_OVERRIDDEN
+ *   or ENTITY_FIXED.
+ *
+ * @return
+ *   TRUE if the entity has the status, FALSE otherwise.
+ */
+function entity_has_status($entity_type, $entity, $status) {
+  $info = entity_get_info($entity_type);
+  $status_key = empty($info['entity keys']['status']) ? 'status' : $info['entity keys']['status'];
+  return isset($entity->{$status_key}) && ($entity->{$status_key} & $status) == $status;
+}
+
+/**
+ * Export a variable. Copied from ctools.
+ *
+ * This is a replacement for var_export(), allowing us to more nicely
+ * format exports. It will recurse down into arrays and will try to
+ * properly export bools when it can.
+ */
+function entity_var_export($var, $prefix = '') {
+  if (is_array($var)) {
+    if (empty($var)) {
+      $output = 'array()';
+    }
+    else {
+      $output = "array(\n";
+      foreach ($var as $key => $value) {
+        $output .= "  '$key' => " . entity_var_export($value, '  ') . ",\n";
+      }
+      $output .= ')';
+    }
+  }
+  elseif (is_bool($var)) {
+    $output = $var ? 'TRUE' : 'FALSE';
+  }
+  else {
+    $output = var_export($var, TRUE);
+  }
+
+  if ($prefix) {
+    $output = str_replace("\n", "\n$prefix", $output);
+  }
+  return $output;
+}
+
+/**
+ * Export a variable in pretty formatted JSON.
+ */
+function entity_var_json_export($var, $prefix = '') {
+  if (is_array($var) && $var) {
+    // Defines whether we use a JSON array or object.
+    $use_array = ($var == array_values($var));
+    $output = $use_array ? "[" : "{";
+
+    foreach ($var as $key => $value) {
+      if ($use_array) {
+        $values[] = entity_var_json_export($value, '  ');
+      }
+      else {
+        $values[] = entity_var_json_export((string) $key, '  ') . ' : ' . entity_var_json_export($value, '  ');
+      }
+    }
+    // Use several lines for long content. However for objects with a single
+    // entry keep the key in the first line.
+    if (strlen($content = implode(', ', $values)) > 70 && ($use_array || count($values) > 1)) {
+      $output .= "\n  " . implode(",\n  ", $values) . "\n";
+    }
+    elseif (strpos($content, "\n") !== FALSE) {
+      $output .= " " . $content . "\n";
+    }
+    else {
+      $output .= " " . $content . ' ';
+    }
+    $output .= $use_array ? ']' : '}';
+  }
+  else {
+    $output = backdrop_json_encode($var);
+  }
+
+  if ($prefix) {
+    $output = str_replace("\n", "\n$prefix", $output);
+  }
+  return $output;
+}
+
+/**
+ * Rebuild the default entities provided in code.
+ *
+ * Exportable entities provided in code get saved to the database once a module
+ * providing defaults in code is activated. This allows module and entity_load()
+ * to easily deal with exportable entities just by relying on the database.
+ *
+ * The defaults get rebuilt if the cache is cleared or new modules providing
+ * defaults are enabled, such that the defaults in the database are up to date.
+ * A default entity gets updated with the latest defaults in code during rebuild
+ * as long as the default has not been overridden. Once a module providing
+ * defaults is disabled, its default entities get removed from the database
+ * unless they have been overridden. In that case the overridden entity is left
+ * in the database, but its status gets updated to 'custom'.
+ *
+ * @param $entity_types
+ *   (optional) If specified, only the defaults of the given entity types are
+ *   rebuilt.
+ */
+function entity_defaults_rebuild($entity_types = NULL) {
+  if (!isset($entity_types)) {
+    $entity_types = array();
+    foreach (entity_crud_get_info() as $type => $info) {
+      if (!empty($info['exportable'])) {
+        $entity_types[] = $type;
+      }
+    };
+  }
+  foreach ($entity_types as $type) {
+    _entity_defaults_rebuild($type);
+  }
+}
+
+/**
+ * Actually rebuild the defaults of a given entity type.
+ */
+function _entity_defaults_rebuild($entity_type) {
+  if (lock_acquire('entity_rebuild_' . $entity_type)) {
+    $info = entity_get_info($entity_type);
+    $hook = isset($info['export']['default hook']) ? $info['export']['default hook'] : 'default_' . $entity_type;
+    $keys = $info['entity keys'] + array('module' => 'module', 'status' => 'status', 'name' => $info['entity keys']['id']);
+
+    // Check for the existence of the module and status columns.
+    if (!in_array($keys['status'], $info['schema_fields_sql']['base table']) || !in_array($keys['module'], $info['schema_fields_sql']['base table'])) {
+      trigger_error("Missing database columns for the exportable entity $entity_type as defined by entity_exportable_schema_fields(). Update the according module and run update.php!", E_USER_WARNING);
+      return;
+    }
+
+    // Invoke the hook and collect default entities.
+    $entities = array();
+    foreach (module_implements($hook) as $module) {
+      foreach ((array) module_invoke($module, $hook) as $name => $entity) {
+        $entity->{$keys['name']} = $name;
+        $entity->{$keys['module']} = $module;
+        $entities[$name] = $entity;
+      }
+    }
+    backdrop_alter($hook, $entities);
+
+    // Check for defaults that disappeared.
+    $existing_defaults = entity_load_multiple_by_name($entity_type, FALSE, array($keys['status'] => array(ENTITY_OVERRIDDEN, ENTITY_IN_CODE, ENTITY_FIXED)));
+
+    foreach ($existing_defaults as $name => $entity) {
+      if (empty($entities[$name])) {
+        $entity->is_rebuild = TRUE;
+        if (entity_has_status($entity_type, $entity, ENTITY_OVERRIDDEN)) {
+          $entity->{$keys['status']} = ENTITY_CUSTOM;
+          entity_save($entity_type, $entity);
+        }
+        else {
+          entity_delete($entity_type, $name);
+        }
+        unset($entity->is_rebuild);
+      }
+    }
+
+    // Load all existing entities.
+    $existing_entities = entity_load_multiple_by_name($entity_type, array_keys($entities));
+
+    foreach ($existing_entities as $name => $entity) {
+      if (entity_has_status($entity_type, $entity, ENTITY_CUSTOM)) {
+        // If the entity already exists but is not yet marked as overridden, we
+        // have to update the status.
+        if (!entity_has_status($entity_type, $entity, ENTITY_OVERRIDDEN)) {
+          $entity->{$keys['status']} |= ENTITY_OVERRIDDEN;
+          $entity->{$keys['module']} = $entities[$name]->{$keys['module']};
+          $entity->is_rebuild = TRUE;
+          entity_save($entity_type, $entity);
+          unset($entity->is_rebuild);
+        }
+
+        // The entity is overridden, so we do not need to save the default.
+        unset($entities[$name]);
+      }
+    }
+
+    // Save defaults.
+    $originals = array();
+    foreach ($entities as $name => $entity) {
+      if (!empty($existing_entities[$name])) {
+        // Make sure we are updating the existing default.
+        $entity->{$keys['id']} = $existing_entities[$name]->{$keys['id']};
+        unset($entity->is_new);
+      }
+      // Pre-populate $entity->original as we already have it. So we avoid
+      // loading it again.
+      $entity->original = !empty($existing_entities[$name]) ? $existing_entities[$name] : FALSE;
+      // Keep original entities for hook_{entity_type}_defaults_rebuild()
+      // implementations.
+      $originals[$name] = $entity->original;
+
+      if (!isset($entity->{$keys['status']})) {
+        $entity->{$keys['status']} = ENTITY_IN_CODE;
+      }
+      else {
+        $entity->{$keys['status']} |= ENTITY_IN_CODE;
+      }
+      $entity->is_rebuild = TRUE;
+      entity_save($entity_type, $entity);
+      unset($entity->is_rebuild);
+    }
+
+    // Invoke an entity type-specific hook so modules may apply changes, e.g.
+    // efficiently rebuild caches.
+    module_invoke_all($entity_type . '_defaults_rebuild', $entities, $originals);
+
+    lock_release('entity_rebuild_' . $entity_type);
+  }
+}

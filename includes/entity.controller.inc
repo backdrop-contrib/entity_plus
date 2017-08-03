@@ -352,7 +352,9 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
     module_invoke_all($this->entityType . '_' . $hook, $entity);
     // Invoke the respective entity level hook.
     if ($hook == 'presave' || $hook == 'insert' || $hook == 'update' || $hook == 'delete') {
-      module_invoke_all('entity_' . $hook, $entity, $this->entityType);
+      if (is_a($entity, 'Entity')) {
+        module_invoke_all('entity_' . $hook, $entity, $this->entityType);
+      }
     }
     // Invoke rules.
     if (module_exists('rules')) {
@@ -930,7 +932,9 @@ class EMWControllerExportable extends EMWController {
     module_invoke_all($this->entityType . '_' . $hook, $entity);
     // Invoke the respective entity level hook.
     if ($hook == 'presave' || $hook == 'insert' || $hook == 'update' || $hook == 'delete') {
-      module_invoke_all('entity_' . $hook, $entity, $this->entityType);
+      if (is_a($entity, 'Entity')) {
+        module_invoke_all('entity_' . $hook, $entity, $this->entityType);
+      }
     }
   }
 

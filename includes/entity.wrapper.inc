@@ -854,7 +854,6 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
       if (!entity_type_supports($this->type, 'save')) {
         throw new EntityMetadataWrapperException("There is no information about how to save entities of type " . check_plain($this->type) . '.');
       }
-      //entity_save($this->type, $this->data);
       $this->data->save();
       // On insert, update the identifier afterwards.
       if (!$this->id) {

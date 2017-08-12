@@ -794,3 +794,36 @@ function entity_get_extra_fields_controller($type = NULL) {
   }
   return $static[$type];
 }
+
+/**
+ * Permanently save an entity.
+ *
+ * In case of failures, an exception is thrown.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $entity
+ *   The entity to save.
+ *
+ * @return
+ *   For entity types provided by the CRUD API, SAVED_NEW or SAVED_UPDATED is
+ *   returned depending on the operation performed. If there is no information
+ *   how to save the entity, FALSE is returned.
+ *
+ * @see entity_type_supports()
+ */
+function entity_save($entity_type, $entity) {
+  $info = entity_get_info($entity_type);
+  if (method_exists($entity, 'save')) {
+    return $entity->save();
+  }
+  elseif (isset($info['save callback'])) {
+    $info['save callback']($entity);
+  }
+  elseif (in_array('EMWControllerInterface', class_implements($info['controller class']))) {
+    return entity_get_controller($entity_type)->save($entity);
+  }
+  else {
+    return FALSE;
+  }
+}

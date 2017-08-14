@@ -871,7 +871,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
    */
   public function delete() {
     if ($this->dataAvailable() && $this->value()) {
-      $return = entity_delete($this->type, $this->id);
+      $return = $this->delete();
       if ($return === FALSE) {
         throw new EntityMetadataWrapperException("There is no information about how to delete entities of type " . check_plain($this->type) . '.');
       }

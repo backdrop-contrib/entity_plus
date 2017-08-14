@@ -716,7 +716,7 @@ function _entity_defaults_rebuild($entity_type) {
           entity_save($entity_type, $entity);
         }
         else {
-          entity_delete($entity_type, $name);
+          $entity->delete();
         }
         unset($entity->is_rebuild);
       }

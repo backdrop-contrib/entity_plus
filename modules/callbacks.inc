@@ -397,7 +397,7 @@ function entity_metadata_user_set_properties($account, $name, $value) {
 function entity_metadata_user_roles($property_name = 'roles', $info = array(), $op = 'edit') {
   $roles = user_roles();
   if ($op == 'edit') {
-    unset($roles[BACKDROP_AUTHENTICATED_RID], $roles[BACKDROP_ANONYMOUS_RID]);
+    unset($roles[BACKDROP_AUTHENTICATED_ROLE], $roles[BACKDROP_ANONYMOUS_ROLE]);
   }
   return $roles;
 }

@@ -1,5 +1,0 @@
-name = Entity Metadata Wrapper
-description = Returns a property wrapper for given data.
-
-backdrop = 1.x
-type = module

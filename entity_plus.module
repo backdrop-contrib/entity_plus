@@ -4,11 +4,11 @@
  * Returns a property wrapper for given data.
  */
 
-module_load_include('inc', 'entity_metadata_wrapper', 'modules/callbacks');
-module_load_include('inc', 'entity_metadata_wrapper', 'includes/entity.property');
+module_load_include('inc', 'entity_plus', 'modules/callbacks');
+module_load_include('inc', 'entity_plus', 'includes/entity.property');
 
 function entity_metadata_wrapper($type, $data = NULL, array $info = array()) {
-  if ($type == 'entity' || (($entity_info = entity_get_info()) && isset($entity_info[$type]))) {
+  if ($type == 'entity' || (($entity_plus_info = entity_get_info()) && isset($entity_plus_info[$type]))) {
     // If the passed entity is the global $user, we load the user object by only
     // passing on the user id. The global user is not a fully loaded entity.
     if ($type == 'user' && is_object($data) && $data == $GLOBALS['user']) {
@@ -16,7 +16,7 @@ function entity_metadata_wrapper($type, $data = NULL, array $info = array()) {
     }
     return new EntityBackdropWrapper($type, $data, $info);
   }
-  elseif ($type == 'list' || entity_property_list_extract_type($type)) {
+  elseif ($type == 'list' || entity_plus_property_list_extract_type($type)) {
     return new EntityListWrapper($type, $data, $info);
   }
   elseif (isset($info['property info'])) {
@@ -41,7 +41,7 @@ function emw($type, $data = NULL, array $info = array()) {
   return entity_metadata_wrapper($type, $data, $info);
 }
 
-function entity_metadata_wrapper_autoload_info() {
+function entity_plus_autoload_info() {
   return array(
     'EntityValueWrapper' => 'includes/entity.wrapper.inc',
     'EntityStructureWrapper' => 'includes/entity.wrapper.inc',
@@ -54,48 +54,22 @@ function entity_metadata_wrapper_autoload_info() {
     'EntityDefaultMetadataController' => 'includes/entity.wrapper.inc',
     'EntityExtraFieldsControllerInterface' => 'includes/entity.wrapper.inc',
     'EntityDefaultExtraFieldsController' => 'includes/entity.wrapper.inc',
-    'EMWControllerInterface' => 'includes/entity.controller.inc',
-    'EMWControllerRevisionableInterface' => 'includes/entity.controller.inc',
-    'EMWController' => 'includes/entity.controller.inc',
-    'EMWControllerExportable' => 'includes/entity.controller.inc',
-    'EMWControllerInterface' => 'includes/entity.controller.inc',
-    'EMWControllerInterface' => 'includes/entity.controller.inc',
+    'EntityPlusControllerInterface' => 'includes/entity.controller.inc',
+    'EntityPlusControllerRevisionableInterface' => 'includes/entity.controller.inc',
+    'EntityPlusController' => 'includes/entity.controller.inc',
+    'EntityPlusControllerExportable' => 'includes/entity.controller.inc',
+    'EntityPlusControllerInterface' => 'includes/entity.controller.inc',
+    'EntityPlusControllerInterface' => 'includes/entity.controller.inc',
   );
-}
-
-function entity_metadata_wrapper_get_property_info($entity_type = NULL) {
-  // Use the advanced backdrop_static() pattern, since this is called very often.
-  static $backdrop_static_fast;
-  if (!isset($backdrop_static_fast)) {
-    $backdrop_static_fast['info'] = &backdrop_static(__FUNCTION__);
-  }
-  $info = &$backdrop_static_fast['info'];
-
-  // hook_entity_property_info() includes translated strings, so each language
-  // is cached separately.
-  $langcode = $GLOBALS['language']->langcode;
-
-  if (empty($info)) {
-    if ($cache = cache_get("entity_property_info:$langcode")) {
-      $info = $cache->data;
-    }
-    else {
-      $info = module_invoke_all('entity_property_info');
-      // Let other modules alter the entity info.
-      backdrop_alter('entity_property_info', $info);
-      cache_set("entity_property_info:$langcode", $info);
-    }
-  }
-  return empty($entity_type) ? $info : (isset($info[$entity_type]) ? $info[$entity_type] : array());
 }
 
 /**
  * Implements hook_entity_property_info().
  */
-function entity_metadata_wrapper_entity_property_info() {
+function entity_plus_entity_property_info() {
   $items = array();
   // Add in info about entities provided by the CRUD API.
-  foreach (entity_crud_get_info() as $type => $info) {
+  foreach (entity_plus_crud_get_info() as $type => $info) {
     // Automatically enable the controller only if the module does not implement
     // the hook itself.
     if (!isset($info['metadata controller class']) && !empty($info['base table']) && (!isset($info['module']) || !module_hook($info['module'], 'entity_property_info'))) {
@@ -107,9 +81,9 @@ function entity_metadata_wrapper_entity_property_info() {
     }
   }
   // Add in info for all core entities.
-  foreach (_entity_metadata_core_modules() as $module) {
-    module_load_include('inc', 'entity_metadata_wrapper', "modules/$module.info");
-    if (function_exists($function = "entity_metadata_{$module}_entity_property_info")) {
+  foreach (_entity_plus_metadata_core_modules() as $module) {
+    module_load_include('inc', 'entity_plus', "modules/$module.info");
+    if (function_exists($function = "entity_plus_metadata_{$module}_entity_property_info")) {
       if ($return = $function()) {
         $items = array_merge_recursive($items, $return);
       }
@@ -124,18 +98,18 @@ function entity_metadata_wrapper_entity_property_info() {
  * Unlike entity_extract_ids() this function returns the name of the entity
  * instead of the numeric id, in case the entity type has specified a name key.
  *
- * @param $entity_type
+ * @param $entity_plus_type
  *   The type of the entity.
  * @param $entity
  *   An entity object.
  *
  * @see entity_extract_ids()
  */
-function entity_id($entity_type, $entity) {
+function entity_plus_id($entity_plus_type, $entity) {
   if (method_exists($entity, 'identifier')) {
     return $entity->identifier();
   }
-  $info = entity_get_info($entity_type);
+  $info = entity_get_info($entity_plus_type);
   $key = isset($info['entity keys']['name']) ? $info['entity keys']['name'] : $info['entity keys']['id'];
   return isset($entity->$key) ? $entity->$key : NULL;
 }
@@ -145,26 +119,26 @@ function entity_id($entity_type, $entity) {
  *
  * @return
  *  An array in the same format as entity_get_info(), containing the entities
- *  whose controller class implements the EMWControllerInterface.
+ *  whose controller class implements the EntityPlusControllerInterface.
  */
-function entity_crud_get_info() {
+function entity_plus_crud_get_info() {
   $types = array();
   foreach (entity_get_info() as $type => $info) {
-    if (isset($info['controller class']) && in_array('EMWControllerInterface', class_implements($info['controller class']))) {
+    if (isset($info['controller class']) && in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
       $types[$type] = $info;
     }
   }
   return $types;
 }
 
-function _entity_metadata_core_modules() {
+function _entity_plus_metadata_core_modules() {
   return array_filter(array('book', 'comment', 'field', 'locale', 'node', 'taxonomy', 'user', 'system', 'statistics'), 'module_exists');
 }
 
 /**
  * Determines whether for the given entity type a given operation is available.
  *
- * @param $entity_type
+ * @param $entity_plus_type
  *   The type of the entity.
  * @param $op
  *   One of 'create', 'view', 'save', 'delete', 'revision delete', 'access' or
@@ -173,8 +147,8 @@ function _entity_metadata_core_modules() {
  * @return boolean
  *   Whether the entity type supports the given operation.
  */
-function entity_type_supports($entity_type, $op) {
-  $info = entity_get_info($entity_type);
+function entity_plus_type_supports($entity_plus_type, $op) {
+  $info = entity_get_info($entity_plus_type);
   $keys = array(
     'view' => 'view callback',
     'create' => 'creation callback',
@@ -188,35 +162,35 @@ function entity_type_supports($entity_type, $op) {
     return TRUE;
   }
   if ($op == 'revision delete') {
-    return in_array('EMWControllerInterface', class_implements($info['controller class']));
+    return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));
   }
   if ($op == 'form') {
-    return (bool) entity_ui_controller($entity_type);
+    return (bool) entity_plus_ui_controller($entity_plus_type);
   }
   if ($op != 'access') {
-    return in_array('EMWControllerInterface', class_implements($info['controller class']));
+    return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));
   }
   return FALSE;
 }
 
 /**
- * Implements hook_entity_info_alter().
+ * Implements hook_entity_plus_info_alter().
  *
- * @see entity_module_implements_alter()
+ * @see entity_plus_module_implements_alter()
  */
-function entity_metadata_wrapper_entity_info_alter(&$entity_info) {
-  _entity_info_add_metadata($entity_info);
+function entity_plus_entity_plus_info_alter(&$entity_plus_info) {
+  _entity_plus_info_add_metadata($entity_plus_info);
 
   // Populate a default value for the 'configuration' key of all entity types.
-  foreach ($entity_info as $type => $info) {
+  foreach ($entity_plus_info as $type => $info) {
     if (!isset($info['configuration'])) {
-      $entity_info[$type]['configuration'] = !empty($info['exportable']);
+      $entity_plus_info[$type]['configuration'] = !empty($info['exportable']);
     }
 
-    if (isset($info['controller class']) && in_array('EMWControllerInterface', class_implements($info['controller class']))) {
+    if (isset($info['controller class']) && in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
       // Automatically disable field cache when entity cache is used.
       if (!empty($info['entity cache']) && module_exists('entitycache')) {
-        $entity_info[$type]['field cache'] = FALSE;
+        $entity_plus_info[$type]['field cache'] = FALSE;
       }
     }
   }
@@ -225,81 +199,81 @@ function entity_metadata_wrapper_entity_info_alter(&$entity_info) {
 /**
  * Adds metadata and callbacks for core entities to the entity info.
  */
-function _entity_info_add_metadata(&$entity_info) {
+function _entity_plus_info_add_metadata(&$entity_plus_info) {
   // Set plural labels.
-  $entity_info['node']['plural label'] = t('Nodes');
-  $entity_info['user']['plural label'] = t('Users');
-  $entity_info['file']['plural label'] = t('Files');
+  $entity_plus_info['node']['plural label'] = t('Nodes');
+  $entity_plus_info['user']['plural label'] = t('Users');
+  $entity_plus_info['file']['plural label'] = t('Files');
 
   // Set descriptions.
-  $entity_info['node']['description'] = t('Nodes represent the main site content items.');
-  $entity_info['user']['description'] = t('Users who have created accounts on your site.');
-  $entity_info['file']['description'] = t('Uploaded file.');
+  $entity_plus_info['node']['description'] = t('Nodes represent the main site content items.');
+  $entity_plus_info['user']['description'] = t('Users who have created accounts on your site.');
+  $entity_plus_info['file']['description'] = t('Uploaded file.');
 
   // Set access callbacks.
-  $entity_info['node']['access callback'] = 'entity_metadata_no_hook_node_access';
-  $entity_info['user']['access callback'] = 'entity_metadata_user_access';
-  // File entity has it's own entity_access function.
+  $entity_plus_info['node']['access callback'] = 'entity_plus_metadata_no_hook_node_access';
+  $entity_plus_info['user']['access callback'] = 'entity_plus_metadata_user_access';
+  // File entity has it's own entity_plus_access function.
   if (!module_exists('file_entity')) {
-    $entity_info['file']['access callback'] = 'entity_metadata_file_access';
+    $entity_plus_info['file']['access callback'] = 'entity_plus_metadata_file_access';
   }
 
   // CRUD function callbacks.
-  $entity_info['node']['creation callback'] = 'entity_metadata_create_node';
-  $entity_info['node']['save callback'] = 'node_save';
-  $entity_info['node']['deletion callback'] = 'node_delete';
-  $entity_info['node']['revision deletion callback'] = 'node_revision_delete';
-  $entity_info['user']['creation callback'] = 'entity_metadata_create_object';
-  $entity_info['user']['save callback'] = 'entity_metadata_user_save';
-  $entity_info['user']['deletion callback'] = 'user_delete';
-  $entity_info['file']['save callback'] = 'file_save';
-  $entity_info['file']['deletion callback'] = 'entity_metadata_delete_file';
+  $entity_plus_info['node']['creation callback'] = 'entity_plus_metadata_create_node';
+  $entity_plus_info['node']['save callback'] = 'node_save';
+  $entity_plus_info['node']['deletion callback'] = 'node_delete';
+  $entity_plus_info['node']['revision deletion callback'] = 'node_revision_delete';
+  $entity_plus_info['user']['creation callback'] = 'entity_plus_metadata_create_object';
+  $entity_plus_info['user']['save callback'] = 'entity_plus_metadata_user_save';
+  $entity_plus_info['user']['deletion callback'] = 'user_delete';
+  $entity_plus_info['file']['save callback'] = 'file_save';
+  $entity_plus_info['file']['deletion callback'] = 'entity_plus_metadata_delete_file';
 
   // Form callbacks.
-  $entity_info['node']['form callback'] = 'entity_metadata_form_node';
-  $entity_info['user']['form callback'] = 'entity_metadata_form_user';
+  $entity_plus_info['node']['form callback'] = 'entity_plus_metadata_form_node';
+  $entity_plus_info['user']['form callback'] = 'entity_plus_metadata_form_user';
 
   // URI callbacks.
-  if (!isset($entity_info['file']['uri callback'])) {
-    $entity_info['file']['uri callback'] = 'entity_metadata_uri_file';
+  if (!isset($entity_plus_info['file']['uri callback'])) {
+    $entity_plus_info['file']['uri callback'] = 'entity_plus_metadata_uri_file';
   }
 
   // View callbacks.
-  $entity_info['node']['view callback'] = 'entity_metadata_view_node';
-  $entity_info['user']['view callback'] = 'entity_metadata_view_single';
+  $entity_plus_info['node']['view callback'] = 'entity_plus_metadata_view_node';
+  $entity_plus_info['user']['view callback'] = 'entity_plus_metadata_view_single';
 
   if (module_exists('comment')) {
-    $entity_info['comment']['plural label'] = t('Comments');
-    $entity_info['comment']['description'] = t('Remark or note that refers to a node.');
-    $entity_info['comment']['access callback'] = 'entity_metadata_comment_access';
-    $entity_info['comment']['creation callback'] = 'entity_metadata_create_comment';
-    $entity_info['comment']['save callback'] = 'comment_save';
-    $entity_info['comment']['deletion callback'] = 'comment_delete';
-    $entity_info['comment']['view callback'] = 'entity_metadata_view_comment';
-    $entity_info['comment']['form callback'] = 'entity_metadata_form_comment';
+    $entity_plus_info['comment']['plural label'] = t('Comments');
+    $entity_plus_info['comment']['description'] = t('Remark or note that refers to a node.');
+    $entity_plus_info['comment']['access callback'] = 'entity_plus_metadata_comment_access';
+    $entity_plus_info['comment']['creation callback'] = 'entity_plus_metadata_create_comment';
+    $entity_plus_info['comment']['save callback'] = 'comment_save';
+    $entity_plus_info['comment']['deletion callback'] = 'comment_delete';
+    $entity_plus_info['comment']['view callback'] = 'entity_plus_metadata_view_comment';
+    $entity_plus_info['comment']['form callback'] = 'entity_plus_metadata_form_comment';
   }
   if (module_exists('taxonomy')) {
-    $entity_info['taxonomy_term']['plural label'] = t('Taxonomy terms');
-    $entity_info['taxonomy_term']['description'] = t('Taxonomy terms are used for classifying content.');
-    $entity_info['taxonomy_term']['access callback'] = 'entity_metadata_taxonomy_access';
-    $entity_info['taxonomy_term']['creation callback'] = 'entity_metadata_create_object';
-    $entity_info['taxonomy_term']['save callback'] = 'taxonomy_term_save';
-    $entity_info['taxonomy_term']['deletion callback'] = 'taxonomy_term_delete';
-    $entity_info['taxonomy_term']['view callback'] = 'entity_metadata_view_single';
-    $entity_info['taxonomy_term']['form callback'] = 'entity_metadata_form_taxonomy_term';
+    $entity_plus_info['taxonomy_term']['plural label'] = t('Taxonomy terms');
+    $entity_plus_info['taxonomy_term']['description'] = t('Taxonomy terms are used for classifying content.');
+    $entity_plus_info['taxonomy_term']['access callback'] = 'entity_plus_metadata_taxonomy_access';
+    $entity_plus_info['taxonomy_term']['creation callback'] = 'entity_plus_metadata_create_object';
+    $entity_plus_info['taxonomy_term']['save callback'] = 'taxonomy_term_save';
+    $entity_plus_info['taxonomy_term']['deletion callback'] = 'taxonomy_term_delete';
+    $entity_plus_info['taxonomy_term']['view callback'] = 'entity_plus_metadata_view_single';
+    $entity_plus_info['taxonomy_term']['form callback'] = 'entity_plus_metadata_form_taxonomy_term';
 
-    if (isset($entity_info['taxonomy_vocabulary'])) {
-      $entity_info['taxonomy_vocabulary']['plural label'] = t('Taxonomy vocabularies');
-      $entity_info['taxonomy_vocabulary']['description'] = t('Vocabularies contain related taxonomy terms, which are used for classifying content.');
-      $entity_info['taxonomy_vocabulary']['access callback'] = 'entity_metadata_taxonomy_access';
-      $entity_info['taxonomy_vocabulary']['creation callback'] = 'entity_metadata_create_object';
-      $entity_info['taxonomy_vocabulary']['save callback'] = 'taxonomy_vocabulary_save';
-      $entity_info['taxonomy_vocabulary']['deletion callback'] = 'taxonomy_vocabulary_delete';
-      $entity_info['taxonomy_vocabulary']['form callback'] = 'entity_metadata_form_taxonomy_vocabulary';
-      $entity_info['taxonomy_vocabulary']['token type'] = 'vocabulary';
+    if (isset($entity_plus_info['taxonomy_vocabulary'])) {
+      $entity_plus_info['taxonomy_vocabulary']['plural label'] = t('Taxonomy vocabularies');
+      $entity_plus_info['taxonomy_vocabulary']['description'] = t('Vocabularies contain related taxonomy terms, which are used for classifying content.');
+      $entity_plus_info['taxonomy_vocabulary']['access callback'] = 'entity_plus_metadata_taxonomy_access';
+      $entity_plus_info['taxonomy_vocabulary']['creation callback'] = 'entity_plus_metadata_create_object';
+      $entity_plus_info['taxonomy_vocabulary']['save callback'] = 'taxonomy_vocabulary_save';
+      $entity_plus_info['taxonomy_vocabulary']['deletion callback'] = 'taxonomy_vocabulary_delete';
+      $entity_plus_info['taxonomy_vocabulary']['form callback'] = 'entity_plus_metadata_form_taxonomy_vocabulary';
+      $entity_plus_info['taxonomy_vocabulary']['token type'] = 'vocabulary';
     }
     // Token type mapping.
-    $entity_info['taxonomy_term']['token type'] = 'term';
+    $entity_plus_info['taxonomy_term']['token type'] = 'term';
   }
 }
 
@@ -311,7 +285,7 @@ function _entity_info_add_metadata(&$entity_info) {
  * view a single entity without any id, e.g. for generating a preview during
  * creation.
  *
- * @param $entity_type
+ * @param $entity_plus_type
  *   The type of the entity.
  * @param $entities
  *   An array of entities to render.
@@ -326,22 +300,22 @@ function _entity_info_add_metadata(&$entity_info) {
  *   in another context. If FALSE the entity will be displayed with its title
  *   in a mode suitable for lists.
  *   If unset, the page mode will be enabled if the current path is the URI
- *   of the entity, as returned by entity_uri().
+ *   of the entity, as returned by entity_plus_uri().
  *   This parameter is only supported for entities which controller is a
- *   EMWControllerInterface.
+ *   EntityPlusControllerInterface.
  * @return
  *   The renderable array, keyed by the entity type and by entity identifiers,
- *   for which the entity name is used if existing - see entity_id(). If there
+ *   for which the entity name is used if existing - see entity_plus_id(). If there
  *   is no information on how to view an entity, FALSE is returned.
  */
-function entity_view($entity_type, $entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
-  $info = entity_get_info($entity_type);
+function entity_plus_view($entity_plus_type, $entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+  $info = entity_get_info($entity_plus_type);
   if (isset($info['view callback'])) {
-    $entities = entity_key_array_by_property($entities, $info['entity keys']['id']);
-    return $info['view callback']($entities, $view_mode, $langcode, $entity_type);
+    $entities = entity_plus_key_array_by_property($entities, $info['entity keys']['id']);
+    return $info['view callback']($entities, $view_mode, $langcode, $entity_plus_type);
   }
-  elseif (in_array('EMWControllerInterface', class_implements($info['controller class']))) {
-    return entity_get_controller($entity_type)->view($entities, $view_mode, $langcode, $page);
+  elseif (in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
+    return entity_plus_get_controller($entity_plus_type)->view($entities, $view_mode, $langcode, $page);
   }
   return FALSE;
 }
@@ -353,14 +327,14 @@ function entity_view($entity_type, $entities, $view_mode = 'full', $langcode = N
  * check if the user has create access.
  *
  * @code
- * $node = entity_create('node', array('type' => 'page'));
- * $access = entity_access('create', 'node', $node, $account);
+ * $node = entity_plus_create('node', array('type' => 'page'));
+ * $access = entity_plus_access('create', 'node', $node, $account);
  * @endcode
  *
  * @param $op
  *   The operation being performed. One of 'view', 'update', 'create' or
  *   'delete'.
- * @param $entity_type
+ * @param $entity_plus_type
  *   The entity type of the entity to check for.
  * @param $entity
  *   Optionally an entity to check access for. If no entity is given, it will be
@@ -372,11 +346,11 @@ function entity_view($entity_type, $entities, $view_mode = 'full', $langcode = N
  *   Whether access is allowed or not. If the entity type does not specify any
  *   access information, NULL is returned.
  *
- * @see entity_type_supports()
+ * @see entity_plus_type_supports()
  */
-function entity_access($op, $entity_type, $entity = NULL, $account = NULL) {
-  if (($info = entity_get_info()) && isset($info[$entity_type]['access callback'])) {
-    return $info[$entity_type]['access callback']($op, $entity, $account, $entity_type);
+function entity_plus_access($op, $entity_plus_type, $entity = NULL, $account = NULL) {
+  if (($info = entity_get_info()) && isset($info[$entity_plus_type]['access callback'])) {
+    return $info[$entity_plus_type]['access callback']($op, $entity, $account, $entity_plus_type);
   }
 }
 
@@ -388,11 +362,11 @@ function entity_access($op, $entity_type, $entity = NULL, $account = NULL) {
  * @return
  *   An array of property info as suiting for hook_entity_property_info().
  */
-function entity_metadata_convert_schema($table) {
+function entity_plus_metadata_convert_schema($table) {
   $schema = backdrop_get_schema($table);
   $properties = array();
   foreach ($schema['fields'] as $name => $info) {
-    if ($type = _entity_metadata_convert_schema_type($info['type'])) {
+    if ($type = _entity_plus_metadata_convert_schema_type($info['type'])) {
       $properties[$name] = array(
         'type' => $type,
         'label' => backdrop_ucfirst($name),
@@ -401,14 +375,14 @@ function entity_metadata_convert_schema($table) {
         // callback. For getting usually no further access callback is needed.
       );
       if ($info['type'] == 'serial') {
-        $properties[$name]['validation callback'] = 'entity_metadata_validate_integer_positive';
+        $properties[$name]['validation callback'] = 'entity_plus_metadata_validate_integer_positive';
       }
     }
   }
   return $properties;
 }
 
-function _entity_metadata_convert_schema_type($type) {
+function _entity_plus_metadata_convert_schema_type($type) {
   switch ($type) {
     case 'int':
     case 'serial':
@@ -437,7 +411,7 @@ function _entity_metadata_convert_schema_type($type) {
  * @return array
  *   The same entities in the same order, but keyed by their $property values.
  */
-function entity_key_array_by_property(array $entities, $property) {
+function entity_plus_key_array_by_property(array $entities, $property) {
   $ret = array();
   foreach ($entities as $entity) {
     $key = isset($entity->$property) ? $entity->$property : NULL;
@@ -455,7 +429,7 @@ function entity_key_array_by_property(array $entities, $property) {
  * Note: Currently, this only works for entity types provided with the entity
  * CRUD API.
  *
- * @param $entity_type
+ * @param $entity_plus_type
  *   The type of the entity.
  * @param $entity
  *   An entity object.
@@ -467,13 +441,13 @@ function entity_key_array_by_property(array $entities, $property) {
  * @return
  *   The renderable array.
  */
-function entity_build_content($entity_type, $entity, $view_mode = 'full', $langcode = NULL) {
-  $info = entity_get_info($entity_type);
+function entity_plus_build_content($entity_plus_type, $entity, $view_mode = 'full', $langcode = NULL) {
+  $info = entity_get_info($entity_plus_type);
   if (method_exists($entity, 'buildContent')) {
     return $entity->buildContent($view_mode, $langcode);
   }
   elseif (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
-    return entity_get_controller($entity_type)->buildContent($entity, $view_mode, $langcode);
+    return entity_plus_get_controller($entity_plus_type)->buildContent($entity, $view_mode, $langcode);
   }
 }
 
@@ -483,7 +457,7 @@ function entity_build_content($entity_type, $entity, $view_mode = 'full', $langc
  * This can be used to load entities of all types in menu paths:
  *
  * @code
- * $items['myentity/%entity_object'] = array(
+ * $items['myentity/%entity_plus_object'] = array(
  *   'load arguments' => array('myentity'),
  *   'title' => ...,
  *   'page callback' => ...,
@@ -492,22 +466,22 @@ function entity_build_content($entity_type, $entity, $view_mode = 'full', $langc
  * );
  * @endcode
  *
- * @param $entity_id
+ * @param $entity_plus_id
  *   The ID of the entity to load, passed by the menu URL.
- * @param $entity_type
+ * @param $entity_plus_type
  *   The type of the entity to load.
  * @return
  *   A fully loaded entity object, or FALSE in case of error.
  */
-function entity_object_load($entity_id, $entity_type) {
-  $entities = entity_load($entity_type, array($entity_id));
+function entity_plus_object_load($entity_plus_id, $entity_plus_type) {
+  $entities = entity_load($entity_plus_type, array($entity_plus_id));
   return reset($entities);
 }
 
 /**
  * A wrapper around entity_load() to return entities keyed by name key if existing.
  *
- * @param $entity_type
+ * @param $entity_plus_type
  *   The entity type to load, e.g. node or user.
  * @param $names
  *   An array of entity names or ids, or FALSE to load all entities.
@@ -523,19 +497,19 @@ function entity_object_load($entity_id, $entity_type) {
  *
  * @see entity_load()
  */
-function entity_load_multiple_by_name($entity_type, $names = FALSE, $conditions = array()) {
-  $entities = entity_load($entity_type, $names, $conditions);
-  $info = entity_get_info($entity_type);
+function entity_load_multiple_by_name($entity_plus_type, $names = FALSE, $conditions = array()) {
+  $entities = entity_load($entity_plus_type, $names, $conditions);
+  $info = entity_get_info($entity_plus_type);
   if (!isset($info['entity keys']['name'])) {
     return $entities;
   }
-  return entity_key_array_by_property($entities, $info['entity keys']['name']);
+  return entity_plus_key_array_by_property($entities, $info['entity keys']['name']);
 }
 
 /**
  * Loads an entity revision.
  *
- * @param $entity_type
+ * @param $entity_plus_type
  *   The type of the entity.
  * @param $revision_id
  *   The id of the revision to load.
@@ -544,11 +518,11 @@ function entity_load_multiple_by_name($entity_type, $names = FALSE, $conditions 
  *   The entity object, or FALSE if there is no entity with the given revision
  *   id.
  */
-function entity_revision_load($entity_type, $revision_id) {
-  $info = entity_get_info($entity_type);
+function entity_plus_revision_load($entity_plus_type, $revision_id) {
+  $info = entity_get_info($entity_plus_type);
   if (!empty($info['entity keys']['revision'])) {
-    $entity_revisions = entity_load($entity_type, FALSE, array($info['entity keys']['revision'] => $revision_id));
-    return reset($entity_revisions);
+    $entity_plus_revisions = entity_load($entity_plus_type, FALSE, array($info['entity keys']['revision'] => $revision_id));
+    return reset($entity_plus_revisions);
   }
   return FALSE;
 }
@@ -556,7 +530,7 @@ function entity_revision_load($entity_type, $revision_id) {
 /**
  * Checks if a given entity has a certain exportable status.
  *
- * @param $entity_type
+ * @param $entity_plus_type
  *   The type of the entity.
  * @param $entity
  *   The entity to check the status on.
@@ -567,8 +541,8 @@ function entity_revision_load($entity_type, $revision_id) {
  * @return
  *   TRUE if the entity has the status, FALSE otherwise.
  */
-function entity_has_status($entity_type, $entity, $status) {
-  $info = entity_get_info($entity_type);
+function entity_plus_has_status($entity_plus_type, $entity, $status) {
+  $info = entity_get_info($entity_plus_type);
   $status_key = empty($info['entity keys']['status']) ? 'status' : $info['entity keys']['status'];
   return isset($entity->{$status_key}) && ($entity->{$status_key} & $status) == $status;
 }
@@ -580,7 +554,7 @@ function entity_has_status($entity_type, $entity, $status) {
  * format exports. It will recurse down into arrays and will try to
  * properly export bools when it can.
  */
-function entity_var_export($var, $prefix = '') {
+function entity_plus_var_export($var, $prefix = '') {
   if (is_array($var)) {
     if (empty($var)) {
       $output = 'array()';
@@ -588,7 +562,7 @@ function entity_var_export($var, $prefix = '') {
     else {
       $output = "array(\n";
       foreach ($var as $key => $value) {
-        $output .= "  '$key' => " . entity_var_export($value, '  ') . ",\n";
+        $output .= "  '$key' => " . entity_plus_var_export($value, '  ') . ",\n";
       }
       $output .= ')';
     }
@@ -609,7 +583,7 @@ function entity_var_export($var, $prefix = '') {
 /**
  * Export a variable in pretty formatted JSON.
  */
-function entity_var_json_export($var, $prefix = '') {
+function entity_plus_var_json_export($var, $prefix = '') {
   if (is_array($var) && $var) {
     // Defines whether we use a JSON array or object.
     $use_array = ($var == array_values($var));
@@ -617,10 +591,10 @@ function entity_var_json_export($var, $prefix = '') {
 
     foreach ($var as $key => $value) {
       if ($use_array) {
-        $values[] = entity_var_json_export($value, '  ');
+        $values[] = entity_plus_var_json_export($value, '  ');
       }
       else {
-        $values[] = entity_var_json_export((string) $key, '  ') . ' : ' . entity_var_json_export($value, '  ');
+        $values[] = entity_plus_var_json_export((string) $key, '  ') . ' : ' . entity_plus_var_json_export($value, '  ');
       }
     }
     // Use several lines for long content. However for objects with a single
@@ -661,36 +635,36 @@ function entity_var_json_export($var, $prefix = '') {
  * unless they have been overridden. In that case the overridden entity is left
  * in the database, but its status gets updated to 'custom'.
  *
- * @param $entity_types
+ * @param $entity_plus_types
  *   (optional) If specified, only the defaults of the given entity types are
  *   rebuilt.
  */
-function entity_defaults_rebuild($entity_types = NULL) {
-  if (!isset($entity_types)) {
-    $entity_types = array();
-    foreach (entity_crud_get_info() as $type => $info) {
+function entity_plus_defaults_rebuild($entity_plus_types = NULL) {
+  if (!isset($entity_plus_types)) {
+    $entity_plus_types = array();
+    foreach (entity_plus_crud_get_info() as $type => $info) {
       if (!empty($info['exportable'])) {
-        $entity_types[] = $type;
+        $entity_plus_types[] = $type;
       }
     };
   }
-  foreach ($entity_types as $type) {
-    _entity_defaults_rebuild($type);
+  foreach ($entity_plus_types as $type) {
+    _entity_plus_defaults_rebuild($type);
   }
 }
 
 /**
  * Actually rebuild the defaults of a given entity type.
  */
-function _entity_defaults_rebuild($entity_type) {
-  if (lock_acquire('entity_rebuild_' . $entity_type)) {
-    $info = entity_get_info($entity_type);
-    $hook = isset($info['export']['default hook']) ? $info['export']['default hook'] : 'default_' . $entity_type;
+function _entity_plus_defaults_rebuild($entity_plus_type) {
+  if (lock_acquire('entity_plus_rebuild_' . $entity_plus_type)) {
+    $info = entity_get_info($entity_plus_type);
+    $hook = isset($info['export']['default hook']) ? $info['export']['default hook'] : 'default_' . $entity_plus_type;
     $keys = $info['entity keys'] + array('module' => 'module', 'status' => 'status', 'name' => $info['entity keys']['id']);
 
     // Check for the existence of the module and status columns.
     if (!in_array($keys['status'], $info['schema_fields_sql']['base table']) || !in_array($keys['module'], $info['schema_fields_sql']['base table'])) {
-      trigger_error("Missing database columns for the exportable entity $entity_type as defined by entity_exportable_schema_fields(). Update the according module and run update.php!", E_USER_WARNING);
+      trigger_error("Missing database columns for the exportable entity $entity_plus_type as defined by entity_plus_exportable_schema_fields(). Update the according module and run update.php!", E_USER_WARNING);
       return;
     }
 
@@ -706,14 +680,14 @@ function _entity_defaults_rebuild($entity_type) {
     backdrop_alter($hook, $entities);
 
     // Check for defaults that disappeared.
-    $existing_defaults = entity_load_multiple_by_name($entity_type, FALSE, array($keys['status'] => array(ENTITY_OVERRIDDEN, ENTITY_IN_CODE, ENTITY_FIXED)));
+    $existing_defaults = entity_load_multiple_by_name($entity_plus_type, FALSE, array($keys['status'] => array(ENTITY_OVERRIDDEN, ENTITY_IN_CODE, ENTITY_FIXED)));
 
     foreach ($existing_defaults as $name => $entity) {
       if (empty($entities[$name])) {
         $entity->is_rebuild = TRUE;
-        if (entity_has_status($entity_type, $entity, ENTITY_OVERRIDDEN)) {
+        if (entity_plus_has_status($entity_plus_type, $entity, ENTITY_OVERRIDDEN)) {
           $entity->{$keys['status']} = ENTITY_CUSTOM;
-          entity_save($entity_type, $entity);
+          entity_plus_save($entity_plus_type, $entity);
         }
         else {
           $entity->delete();
@@ -723,17 +697,17 @@ function _entity_defaults_rebuild($entity_type) {
     }
 
     // Load all existing entities.
-    $existing_entities = entity_load_multiple_by_name($entity_type, array_keys($entities));
+    $existing_entities = entity_load_multiple_by_name($entity_plus_type, array_keys($entities));
 
     foreach ($existing_entities as $name => $entity) {
-      if (entity_has_status($entity_type, $entity, ENTITY_CUSTOM)) {
+      if (entity_plus_has_status($entity_plus_type, $entity, ENTITY_CUSTOM)) {
         // If the entity already exists but is not yet marked as overridden, we
         // have to update the status.
-        if (!entity_has_status($entity_type, $entity, ENTITY_OVERRIDDEN)) {
+        if (!entity_plus_has_status($entity_plus_type, $entity, ENTITY_OVERRIDDEN)) {
           $entity->{$keys['status']} |= ENTITY_OVERRIDDEN;
           $entity->{$keys['module']} = $entities[$name]->{$keys['module']};
           $entity->is_rebuild = TRUE;
-          entity_save($entity_type, $entity);
+          entity_plus_save($entity_plus_type, $entity);
           unset($entity->is_rebuild);
         }
 
@@ -753,7 +727,7 @@ function _entity_defaults_rebuild($entity_type) {
       // Pre-populate $entity->original as we already have it. So we avoid
       // loading it again.
       $entity->original = !empty($existing_entities[$name]) ? $existing_entities[$name] : FALSE;
-      // Keep original entities for hook_{entity_type}_defaults_rebuild()
+      // Keep original entities for hook_{entity_plus_type}_defaults_rebuild()
       // implementations.
       $originals[$name] = $entity->original;
 
@@ -764,15 +738,15 @@ function _entity_defaults_rebuild($entity_type) {
         $entity->{$keys['status']} |= ENTITY_IN_CODE;
       }
       $entity->is_rebuild = TRUE;
-      entity_save($entity_type, $entity);
+      entity_plus_save($entity_plus_type, $entity);
       unset($entity->is_rebuild);
     }
 
     // Invoke an entity type-specific hook so modules may apply changes, e.g.
     // efficiently rebuild caches.
-    module_invoke_all($entity_type . '_defaults_rebuild', $entities, $originals);
+    module_invoke_all($entity_plus_type . '_defaults_rebuild', $entities, $originals);
 
-    lock_release('entity_rebuild_' . $entity_type);
+    lock_release('entity_plus_rebuild_' . $entity_plus_type);
   }
 }
 
@@ -782,7 +756,7 @@ function _entity_defaults_rebuild($entity_type) {
  * @return EntityExtraFieldsControllerInterface|false
  *   The controller for the given entity type or FALSE if none is specified.
  */
-function entity_get_extra_fields_controller($type = NULL) {
+function entity_plus_get_extra_fields_controller($type = NULL) {
   $static = &backdrop_static(__FUNCTION__);
 
   if (!isset($static[$type])) {
@@ -800,7 +774,7 @@ function entity_get_extra_fields_controller($type = NULL) {
  *
  * In case of failures, an exception is thrown.
  *
- * @param $entity_type
+ * @param $entity_plus_type
  *   The type of the entity.
  * @param $entity
  *   The entity to save.
@@ -810,18 +784,18 @@ function entity_get_extra_fields_controller($type = NULL) {
  *   returned depending on the operation performed. If there is no information
  *   how to save the entity, FALSE is returned.
  *
- * @see entity_type_supports()
+ * @see entity_plus_type_supports()
  */
-function entity_save($entity_type, $entity) {
-  $info = entity_get_info($entity_type);
+function entity_plus_save($entity_plus_type, $entity) {
+  $info = entity_get_info($entity_plus_type);
   if (method_exists($entity, 'save')) {
     return $entity->save();
   }
   elseif (isset($info['save callback'])) {
     $info['save callback']($entity);
   }
-  elseif (in_array('EMWControllerInterface', class_implements($info['controller class']))) {
-    return entity_get_controller($entity_type)->save($entity);
+  elseif (in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
+    return entity_plus_get_controller($entity_plus_type)->save($entity);
   }
   else {
     return FALSE;

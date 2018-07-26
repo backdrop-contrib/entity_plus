@@ -47,7 +47,7 @@ Usage
      $wrapper->author->mail = 'sepp@example.com';
 
   The wrappers always return the data as described in the property
-  information, which may be retrieved directly via entity_get_property_info()
+  information, which may be retrieved directly via entity_plus_get_property_info()
   or from the wrapper:
 
      $mail_info = $wrapper->author->mail->info();

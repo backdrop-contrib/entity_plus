@@ -57,14 +57,14 @@ class EntityMetadataTestCase extends EntityWebTestCase {
   }
 
   function setUp() {
-    parent::setUp('entity_metadata_wrapper', 'entity_test', 'locale');
+    parent::setUp('entity_metadata_wrapper', 'entity_plus_test', 'locale');
     // Create a field having 4 values for testing multiple value support.
     $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $this->field = array('field_name' => $this->field_name, 'type' => 'text', 'cardinality' => 4);
     $this->field = field_create_field($this->field);
     $this->instance = array(
       'field_name' => $this->field_name,
-      'entity_type' => 'node',
+      'entity_plus_type' => 'node',
       'bundle' => 'page',
       'label' => $this->randomName() . '_label',
       'description' => $this->randomName() . '_description',
@@ -206,7 +206,7 @@ class EntityMetadataTestCase extends EntityWebTestCase {
     $this->assertEqual($wrapper->body->value->value(), "<p>English body.</p>\n", 'Default language text is still there.');
 
     // Test iterator.
-    $type_info = entity_get_property_info('node');
+    $type_info = entity_plus_get_property_info('node');
     $this->assertFalse(array_diff_key($type_info['properties'], iterator_to_array($wrapper->getIterator())), 'Iterator is working.');
     foreach ($wrapper as $property) {
       $this->assertTrue($property instanceof EntityMetadataWrapper, 'Iterate over wrapper properties.');
@@ -221,7 +221,7 @@ class EntityMetadataTestCase extends EntityWebTestCase {
     $this->assertEqual($wrapper->type->optionsList(), node_type_get_names(), 'Options list returned.');
 
     // Test making use of a generic 'entity' reference property the
-    // 'entity_test' module provides. The property defaults to the node author.
+    // 'entity_plus_test' module provides. The property defaults to the node author.
     $this->assertEqual($wrapper->reference->uid->value(), $wrapper->author->getIdentifier(), 'Used generic entity reference property.');
     // Test updating a property of the generic entity reference.
     $wrapper->reference->name->set('foo');
@@ -298,11 +298,11 @@ class EntityMetadataTestCase extends EntityWebTestCase {
     // Test using a list of entities with a list of term objects.
     $vocab = $this->createVocabulary();
     $list = array();
-    $list[] = entity_property_values_create_entity('taxonomy_term', array(
+    $list[] = entity_plus_property_values_create_entity('taxonomy_term', array(
       'name' => 'term 1',
       'vocabulary' => $vocab->machine_name,
     ))->save()->value();
-    $list[] = entity_property_values_create_entity('taxonomy_term', array(
+    $list[] = entity_plus_property_values_create_entity('taxonomy_term', array(
       'name' => 'term 2',
       'vocabulary' => $vocab->machine_name,
     ))->save()->value();
@@ -340,13 +340,13 @@ class EntityMetadataTestCase extends EntityWebTestCase {
   function testAccess() {
     // Test without data.
     $account = $this->backdropCreateUser(array('bypass node access'));
-    $this->assertTrue(entity_access('view', 'node', NULL, $account), 'Access without data checked.');
+    $this->assertTrue(entity_plus_access('view', 'node', NULL, $account), 'Access without data checked.');
 
     // Test with actual data.
     $values[LANGUAGE_NONE][0] = array('value' => '<b>2009-09-05</b>');
     $values[LANGUAGE_NONE][1] = array('value' => '2009-09-05');
     $node = $this->backdropCreateNode(array('type' => 'page', $this->field_name => $values));
-    $this->assertTrue(entity_access('delete', 'node', $node, $account), 'Access with data checked.');
+    $this->assertTrue(entity_plus_access('delete', 'node', $node, $account), 'Access with data checked.');
 
     // Test per property access without data.
     $account2 = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
@@ -416,7 +416,7 @@ class EntityMetadataTestCase extends EntityWebTestCase {
   }
 
   /**
-   * Tests using entity_property_query().
+   * Tests using entity_plus_property_query().
    */
   function testEntityQuery() {
     // Creat a test node.
@@ -424,21 +424,21 @@ class EntityMetadataTestCase extends EntityWebTestCase {
     $values[LANGUAGE_NONE][0] = array('value' => 'foo');
     $node = $this->backdropCreateNode(array($this->field_name => $values, 'title' => $title, 'uid' => $GLOBALS['user']->uid));
 
-    $results = entity_property_query('node', 'title', $title);
+    $results = entity_plus_property_query('node', 'title', $title);
     $this->assertEqual($results, array($node->nid), 'Queried nodes with a given title.');
 
-    $results = entity_property_query('node', $this->field_name, 'foo');
+    $results = entity_plus_property_query('node', $this->field_name, 'foo');
     $this->assertEqual($results, array($node->nid), 'Queried nodes with a given field value.');
 
-    $results = entity_property_query('node', $this->field_name, array('foo', 'bar'));
+    $results = entity_plus_property_query('node', $this->field_name, array('foo', 'bar'));
     $this->assertEqual($results, array($node->nid), 'Queried nodes with a list of possible values.');
 
-    $results = entity_property_query('node', 'author', $GLOBALS['user']);
+    $results = entity_plus_property_query('node', 'author', $GLOBALS['user']);
     $this->assertEqual($results, array($node->nid), 'Queried nodes with a given auhtor.');
 
     // Create another test node and try querying for tags.
     $vocab = $this->createVocabulary();
-    $tag = entity_property_values_create_entity('taxonomy_term', array(
+    $tag = entity_plus_property_values_create_entity('taxonomy_term', array(
           'name' => $this->randomName(),
           'vocabulary' => $vocab->machine_name,
     ))->save();
@@ -446,14 +446,14 @@ class EntityMetadataTestCase extends EntityWebTestCase {
     $node = $this->backdropCreateNode(array('type' => 'article', 'field_tags' => $field_tag_value));
 
     // Try query-ing with a single value.
-    $results = entity_property_query('node', 'field_tags', $tag->getIdentifier());
+    $results = entity_plus_property_query('node', 'field_tags', $tag->getIdentifier());
     $this->assertEqual($results, array($node->nid), 'Queried nodes with a given term id.');
 
-    $results = entity_property_query('node', 'field_tags', $tag->value());
+    $results = entity_plus_property_query('node', 'field_tags', $tag->value());
     $this->assertEqual($results, array($node->nid), 'Queried nodes with a given term object.');
 
     // Try query-ing with a list of possible values.
-    $results = entity_property_query('node', 'field_tags', array($tag->getIdentifier()));
+    $results = entity_plus_property_query('node', 'field_tags', array($tag->getIdentifier()));
     $this->assertEqual($results, array($node->nid), 'Queried nodes with a list of term ids.');
   }
 

@@ -9,7 +9,7 @@
 /**
  * Interface for EntityControllers compatible with the entity API.
  */
-interface EMWControllerInterface extends EntityControllerInterface {
+interface EntityPlusControllerInterface extends EntityControllerInterface {
 
   /**
    * Delete permanently saved entities.
@@ -111,9 +111,9 @@ interface EMWControllerInterface extends EntityControllerInterface {
    *   in another context. If FALSE the entity will be displayed with its title
    *   in a mode suitable for lists.
    *   If unset, the page mode will be enabled if the current path is the URI
-   *   of the entity, as returned by entity_uri().
+   *   of the entity, as returned by entity_plus_uri().
    *   This parameter is only supported for entities which controller is a
-   *   EMWControllerInterface.
+   *   EntityPlusControllerInterface.
    * @return
    *   The renderable array, keyed by entity name or numeric id.
    */
@@ -123,7 +123,7 @@ interface EMWControllerInterface extends EntityControllerInterface {
 /**
  * Interface for EntityControllers of entities that support revisions.
  */
-interface EMWControllerRevisionableInterface extends EMWControllerInterface {
+interface EntityPlusControllerRevisionableInterface extends EntityPlusControllerInterface {
 
   /**
    * Delete an entity revision.
@@ -141,9 +141,9 @@ interface EMWControllerRevisionableInterface extends EMWControllerInterface {
 }
 
 /**
- * A controller implementing EMWControllerInterface for the database.
+ * A controller implementing EntityPlusControllerInterface for the database.
  */
-class EMWController extends DefaultEntityController implements EMWControllerRevisionableInterface {
+class EntityPlusController extends DefaultEntityController implements EntityPlusControllerRevisionableInterface {
 
   protected $cacheComplete = FALSE;
   protected $bundleKey;
@@ -323,10 +323,10 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    */
   public function invoke($hook, $entity) {
-    // entity_revision_delete() invokes hook_entity_revision_delete() and
+    // entity_plus_revision_delete() invokes hook_entity_plus_revision_delete() and
     // hook_field_attach_delete_revision() just as node module does. So we need
     // to adjust the name of our revision deletion field attach hook in order to
     // stick to this pattern.
@@ -335,7 +335,7 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
       $function($this->entityType, $entity);
     }
 
-    if (!empty($this->entityInfo['bundle of']) && entity_type_is_fieldable($this->entityInfo['bundle of'])) {
+    if (!empty($this->entityInfo['bundle of']) && entity_plus_type_is_fieldable($this->entityInfo['bundle of'])) {
       $type = $this->entityInfo['bundle of'];
       // Call field API bundle attachers for the entity we are a bundle of.
       if ($hook == 'insert') {
@@ -353,7 +353,7 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
     // Invoke the respective entity level hook.
     if ($hook == 'presave' || $hook == 'insert' || $hook == 'update' || $hook == 'delete') {
       if (is_a($entity, 'Entity')) {
-        module_invoke_all('entity_' . $hook, $entity, $this->entityType);
+        module_invoke_all('entity_plus_' . $hook, $entity, $this->entityType);
       }
     }
     // Invoke rules.
@@ -363,7 +363,7 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    *
    * @param $transaction
    *   Optionally a DatabaseTransaction object to use. Allows overrides to pass
@@ -406,12 +406,12 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
   }
 
   /**
-   * Implements EMWControllerRevisionableInterface::deleteRevision().
+   * Implements EntityPlusControllerRevisionableInterface::deleteRevision().
    */
   public function deleteRevision($revision_id) {
-    if ($entity_revision = entity_revision_load($this->entityType, $revision_id)) {
+    if ($entity_plus_revision = entity_plus_revision_load($this->entityType, $revision_id)) {
       // Prevent deleting the default revision.
-      if (entity_revision_is_default($this->entityType, $entity_revision)) {
+      if (entity_plus_revision_is_default($this->entityType, $entity_plus_revision)) {
         return FALSE;
       }
 
@@ -419,14 +419,14 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
         ->condition($this->revisionKey, $revision_id)
         ->execute();
 
-      $this->invoke('revision_delete', $entity_revision);
+      $this->invoke('revision_delete', $entity_plus_revision);
       return TRUE;
     }
     return FALSE;
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    *
    * @param $transaction
    *   Optionally a DatabaseTransaction object to use. Allows overrides to pass
@@ -535,7 +535,7 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    */
   public function create(array $values = array()) {
     // Add is_new property if it is not set.
@@ -547,7 +547,7 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    *
    * @return
    *   A serialized string in JSON format suitable for the import() method.
@@ -555,11 +555,11 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
   public function export($entity, $prefix = '') {
     $vars = get_object_vars($entity);
     unset($vars['is_new']);
-    return entity_var_json_export($vars, $prefix);
+    return entity_plus_var_json_export($vars, $prefix);
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    *
    * @param $export
    *   A serialized string in JSON format as produced by the export() method.
@@ -573,7 +573,7 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    *
    * @param $content
    *   Optionally. Allows pre-populating the built content to ease overridding
@@ -586,16 +586,16 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
 
     // Allow modules to change the view mode.
     $context = array(
-      'entity_type' => $this->entityType,
+      'entity_plus_type' => $this->entityType,
       'entity' => $entity,
       'langcode' => $langcode,
     );
-    backdrop_alter('entity_view_mode', $view_mode, $context);
+    backdrop_alter('entity_plus_view_mode', $view_mode, $context);
     // Make sure the used view-mode gets stored.
     $entity->content += array('#view_mode' => $view_mode);
 
     // By default add in properties for all defined extra fields.
-    if ($extra_field_controller = entity_get_extra_fields_controller($this->entityType)) {
+    if ($extra_field_controller = entity_plus_get_extra_fields_controller($this->entityType)) {
       $wrapper = entity_metadata_wrapper($this->entityType, $entity);
       $extra = $extra_field_controller->fieldExtraFields();
       $type_extra = &$extra[$this->entityType][$this->entityType]['display'];
@@ -623,7 +623,7 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
     else {
       module_invoke_all($this->entityType . '_view', $entity, $view_mode, $langcode);
     }
-    module_invoke_all('entity_view', $entity, $this->entityType, $view_mode, $langcode);
+    module_invoke_all('entity_plus_view', $entity, $this->entityType, $view_mode, $langcode);
     $build = $entity->content;
     unset($entity->content);
     return $build;
@@ -638,44 +638,44 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
     $content[$name] = array(
       '#label_hidden' => FALSE,
       '#label' => $info['label'],
-      '#entity_wrapped' => $wrapper,
-      '#theme' => 'entity_property',
+      '#entity_plus_wrapped' => $wrapper,
+      '#theme' => 'entity_plus_property',
       '#property_name' => $name,
       '#access' => $property->access('view'),
-      '#entity_type' => $this->entityType,
+      '#entity_plus_type' => $this->entityType,
     );
     $content['#attached']['css']['entity.theme'] = backdrop_get_path('module', 'entity') . '/theme/entity.theme.css';
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    */
   public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
-    // For Field API and entity_prepare_view, the entities have to be keyed by
+    // For Field API and entity_plus_prepare_view, the entities have to be keyed by
     // (numeric) id.
-    $entities = entity_key_array_by_property($entities, $this->idKey);
+    $entities = entity_plus_key_array_by_property($entities, $this->idKey);
     if (!empty($this->entityInfo['fieldable'])) {
       field_attach_prepare_view($this->entityType, $entities, $view_mode);
     }
-    entity_prepare_view($this->entityType, $entities);
+    entity_plus_prepare_view($this->entityType, $entities);
     $langcode = isset($langcode) ? $langcode : $GLOBALS['language_content']->langcode;
 
     $view = array();
     foreach ($entities as $entity) {
-      $build = entity_build_content($this->entityType, $entity, $view_mode, $langcode);
+      $build = entity_plus_build_content($this->entityType, $entity, $view_mode, $langcode);
       $build += array(
         // If the entity type provides an implementation, use this instead the
         // generic one.
         // @see template_preprocess_entity()
         '#theme' => 'entity',
-        '#entity_type' => $this->entityType,
+        '#entity_plus_type' => $this->entityType,
         '#entity' => $entity,
         '#view_mode' => $view_mode,
         '#language' => $langcode,
         '#page' => $page,
       );
       // Allow modules to modify the structured entity.
-      backdrop_alter(array($this->entityType . '_view', 'entity_view'), $build, $this->entityType);
+      backdrop_alter(array($this->entityType . '_view', 'entity_plus_view'), $build, $this->entityType);
       $key = isset($entity->{$this->idKey}) ? $entity->{$this->idKey} : NULL;
       $view[$this->entityType][$key] = $build;
     }
@@ -686,7 +686,7 @@ class EMWController extends DefaultEntityController implements EMWControllerRevi
 /**
  * A controller implementing exportables stored in the database.
  */
-class EMWControllerExportable extends EMWController {
+class EntityPlusControllerExportable extends EntityPlusController {
 
   protected $entityCacheByName = array();
   protected $nameKey, $statusKey, $moduleKey;
@@ -753,7 +753,7 @@ class EMWControllerExportable extends EMWController {
     }
 
     $entities_by_id = parent::load($ids, $conditions);
-    $entities += entity_key_array_by_property($entities_by_id, $this->nameKey);
+    $entities += entity_plus_key_array_by_property($entities_by_id, $this->nameKey);
 
     // Ensure that the returned array is keyed by numeric id and ordered the
     // same as the original $ids array and remove any invalid ids.
@@ -795,16 +795,16 @@ class EMWControllerExportable extends EMWController {
   protected function applyConditions($entities, $conditions = array()) {
     if ($conditions) {
       foreach ($entities as $key => $entity) {
-        $entity_values = (array) $entity;
+        $entity_plus_values = (array) $entity;
         // We cannot use array_diff_assoc() here because condition values can
         // also be arrays, e.g. '$conditions = array('status' => array(1, 2))'
         foreach ($conditions as $condition_key => $condition_value) {
           if (is_array($condition_value)) {
-            if (!isset($entity_values[$condition_key]) || !in_array($entity_values[$condition_key], $condition_value)) {
+            if (!isset($entity_plus_values[$condition_key]) || !in_array($entity_plus_values[$condition_key], $condition_value)) {
               unset($entities[$key]);
             }
           }
-          elseif (!isset($entity_values[$condition_key]) || $entity_values[$condition_key] != $condition_value) {
+          elseif (!isset($entity_plus_values[$condition_key]) || $entity_plus_values[$condition_key] != $condition_value) {
             unset($entities[$key]);
           }
         }
@@ -821,7 +821,7 @@ class EMWControllerExportable extends EMWController {
     $this->entityCache += $entities;
     // If we have a name key, also support static caching when loading by name.
     if ($this->nameKey != $this->idKey) {
-      $this->entityCacheByName += entity_key_array_by_property($entities, $this->nameKey);
+      $this->entityCacheByName += entity_plus_key_array_by_property($entities, $this->nameKey);
     }
   }
 
@@ -854,7 +854,7 @@ class EMWControllerExportable extends EMWController {
     // For entities with a name key, pass the entities keyed by name to the
     // specific load hook.
     if ($this->nameKey != $this->idKey) {
-      $entities_by_name = entity_key_array_by_property($queried_entities, $this->nameKey);
+      $entities_by_name = entity_plus_key_array_by_property($queried_entities, $this->nameKey);
     }
     else {
       $entities_by_name = $queried_entities;
@@ -888,8 +888,8 @@ class EMWControllerExportable extends EMWController {
       parent::delete($ids, $transaction);
 
       foreach ($entities as $id => $entity) {
-        if (entity_has_status($this->entityType, $entity, ENTITY_IN_CODE)) {
-          entity_defaults_rebuild(array($this->entityType));
+        if (entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE)) {
+          entity_plus_defaults_rebuild(array($this->entityType));
           break;
         }
       }
@@ -904,10 +904,10 @@ class EMWControllerExportable extends EMWController {
       // To ease figuring out whether this is a revert, make sure that the
       // entity status is updated in case the providing module has been
       // disabled.
-      if (entity_has_status($this->entityType, $entity, ENTITY_IN_CODE) && !module_exists($entity->{$this->moduleKey})) {
+      if (entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE) && !module_exists($entity->{$this->moduleKey})) {
         $entity->{$this->statusKey} = ENTITY_CUSTOM;
       }
-      $is_revert = entity_has_status($this->entityType, $entity, ENTITY_IN_CODE);
+      $is_revert = entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE);
     }
 
     if (!empty($this->entityInfo['fieldable']) && function_exists($function = 'field_attach_' . $hook)) {
@@ -933,7 +933,7 @@ class EMWControllerExportable extends EMWController {
     // Invoke the respective entity level hook.
     if ($hook == 'presave' || $hook == 'insert' || $hook == 'update' || $hook == 'delete') {
       if (is_a($entity, 'Entity')) {
-        module_invoke_all('entity_' . $hook, $entity, $this->entityType);
+        module_invoke_all('entity_plus_' . $hook, $entity, $this->entityType);
       }
     }
   }
@@ -947,7 +947,7 @@ class EMWControllerExportable extends EMWController {
       $entity->original = entity_load_unchanged($this->entityType, $entity->{$this->nameKey});
     }
     // Update the status for entities getting overridden.
-    if (entity_has_status($this->entityType, $entity, ENTITY_IN_CODE) && empty($entity->is_rebuild)) {
+    if (entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE) && empty($entity->is_rebuild)) {
       $entity->{$this->statusKey} |= ENTITY_CUSTOM;
     }
     return parent::save($entity, $transaction);
@@ -962,11 +962,11 @@ class EMWControllerExportable extends EMWController {
     if ($this->nameKey != $this->idKey) {
       unset($vars[$this->idKey]);
     }
-    return entity_var_json_export($vars, $prefix);
+    return entity_plus_var_json_export($vars, $prefix);
   }
 
   /**
-   * Implements EMWControllerInterface.
+   * Implements EntityPlusControllerInterface.
    */
   public function view($entities, $view_mode = 'full', $langcode = NULL, $page = NULL) {
     $view = parent::view($entities, $view_mode, $langcode, $page);

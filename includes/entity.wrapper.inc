@@ -40,7 +40,7 @@ abstract class EntityMetadataWrapper {
    * Gets info about the wrapped data.
    *
    * @return Array
-   *   Keys set are all keys as specified for a property in hook_entity_info()
+   *   Keys set are all keys as specified for a property in hook_entity_plus_info()
    *   as well as possible the following keys:
    *    - name: If this wraps a property, the name of the property.
    *    - parent: The parent wrapper, if any.
@@ -140,7 +140,7 @@ abstract class EntityMetadataWrapper {
    * Returns whether $value is a valid value to set.
    */
   public function validate($value) {
-    if (isset($value) && !entity_property_verify_data_type($value, $this->type)) {
+    if (isset($value) && !entity_plus_property_verify_data_type($value, $this->type)) {
       return FALSE;
     }
     // Only proceed with further checks if this is not a list item. If this is
@@ -200,7 +200,7 @@ abstract class EntityMetadataWrapper {
    */
   public function label() {
     if ($options = $this->optionsList('view')) {
-      $options = entity_property_options_flatten($options);
+      $options = entity_plus_property_options_flatten($options);
       $value = $this->value();
       if (is_scalar($value) && isset($options[$value])) {
         return $options[$value];
@@ -277,7 +277,7 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
 
   protected $propertyInfoDefaults = array(
     'type' => 'text',
-    'getter callback' => 'entity_property_verbatim_get',
+    'getter callback' => 'entity_plus_property_verbatim_get',
     'clear' => array(),
   );
 
@@ -556,7 +556,7 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
 }
 
 /**
- * Provides a wrapper for entities registrered in hook_entity_info().
+ * Provides a wrapper for entities registrered in hook_entity_plus_info().
  *
  * The wrapper eases applying getter and setter callbacks of entity properties
  * specified in hook_entity_property_info().
@@ -586,7 +586,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
   }
 
   protected function setUp() {
-    $this->propertyInfo = entity_metadata_wrapper_get_property_info($this->type) + array('properties' => array());
+    $this->propertyInfo = entity_plus_get_property_info($this->type) + array('properties' => array());
     $info = $this->info + array('property info' => array(), 'bundle' => NULL);
     $this->propertyInfo['properties'] += $info['property info'];
     $this->bundle = $info['bundle'];
@@ -618,7 +618,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
     elseif (is_object($data)) {
       // We got the entity object passed.
       $this->data = $data;
-      $id = entity_id($this->type, $data);
+      $id = entity_plus_id($this->type, $data);
       $this->id = isset($id) ? $id : FALSE;
     }
     else {
@@ -679,7 +679,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
   /**
    * Returns the identifier of the wrapped entity.
    *
-   * @see entity_id()
+   * @see entity_plus_id()
    */
   public function getIdentifier() {
     return $this->dataAvailable() ? $this->value(array('identifier' => TRUE)) : NULL;
@@ -723,10 +723,10 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
   /**
    * Returns the entity prepared for rendering.
    *
-   * @see entity_view()
+   * @see entity_plus_view()
    */
   public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
-    return entity_view($this->type(), array($this->value()), $view_mode, $langcode, $page);
+    return entity_plus_view($this->type(), array($this->value()), $view_mode, $langcode, $page);
   }
 
   /**
@@ -828,17 +828,17 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
   /**
    * Checks whether the operation $op is allowed on the entity.
    *
-   * @see entity_access()
+   * @see entity_plus_access()
    */
   public function entityAccess($op, $account = NULL) {
     $entity = $this->dataAvailable() ? $this->value() : NULL;
     // The value() method could return FALSE on entities such as user 0, so we
     // need to use NULL instead to conform to the expectations of
-    // entity_access().
+    // entity_plus_access().
     if ($entity === FALSE) {
       $entity = NULL;
     }
-    return entity_access($op, $this->type, $entity, $account);
+    return entity_plus_access($op, $this->type, $entity, $account);
   }
 
   /**
@@ -851,7 +851,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
    */
   public function save() {
     if ($this->data) {
-      if (!entity_type_supports($this->type, 'save')) {
+      if (!entity_plus_type_supports($this->type, 'save')) {
         throw new EntityMetadataWrapperException("There is no information about how to save entities of type " . check_plain($this->type) . '.');
       }
       $this->data->save();
@@ -956,7 +956,7 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
   public function __construct($type, $data = NULL, $info = array()) {
     parent::__construct($type, NULL, $info);
 
-    $this->itemType = entity_property_list_extract_type($this->type);
+    $this->itemType = entity_plus_property_list_extract_type($this->type);
     if (!$this->itemType) {
       $this->itemType = 'unknown';
     }
@@ -1112,7 +1112,7 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
    */
   public function label() {
     if ($options = $this->optionsList('view')) {
-      $options = entity_property_options_flatten($options);
+      $options = entity_plus_property_options_flatten($options);
       $labels = array_intersect_key($options, array_flip((array) parent::value()));
     }
     else {
@@ -1275,7 +1275,7 @@ class EntityDefaultMetadataController {
       $info['properties']['url'] = array(
         'label' => t('URL'),
         'description' => t('The URL of the entity.'),
-        'getter callback' => 'entity_metadata_entity_get_properties',
+        'getter callback' => 'entity_plus_metadata_entity_plus_get_properties',
         'type' => 'uri',
         'computed' => TRUE,
         'entity views field' => TRUE,
@@ -1290,9 +1290,9 @@ class EntityDefaultMetadataController {
    */
   public static function bundleOptionsList($name, $info) {
     if (!empty($info['parent']) && $type = $info['parent']) {
-      $entity_info = $info['parent']->entityInfo();
+      $entity_plus_info = $info['parent']->entityInfo();
       $options = array();
-      foreach ($entity_info['bundles'] as $name => $bundle_info) {
+      foreach ($entity_plus_info['bundles'] as $name => $bundle_info) {
         $options[$name] = $bundle_info['label'];
       }
       return $options;
@@ -1303,7 +1303,7 @@ class EntityDefaultMetadataController {
    * Return a set of properties for an entity based on the schema definition
    */
   protected function convertSchema() {
-    return entity_metadata_convert_schema($this->info['base table']);
+    return entity_plus_metadata_convert_schema($this->info['base table']);
   }
 }
 
@@ -1311,7 +1311,7 @@ class EntityDefaultMetadataController {
  * Interface for extra fields controller.
  *
  * Note: Displays extra fields exposed by this controller are rendered by
- * default by the EMWController.
+ * default by the EntityPlusController.
  */
 interface EntityExtraFieldsControllerInterface {
 
@@ -1347,7 +1347,7 @@ class EntityDefaultExtraFieldsController implements EntityExtraFieldsControllerI
   public function __construct($type) {
     $this->entityType = $type;
     $this->entityInfo = entity_get_info($type);
-    $this->propertyInfo = entity_get_property_info($type);
+    $this->propertyInfo = entity_plus_get_property_info($type);
   }
 
   /**

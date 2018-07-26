@@ -1,0 +1,5 @@
+name = Entity Plus
+description = Functions and wrppers to extend core Entity functionality.
+
+backdrop = 1.x
+type = module

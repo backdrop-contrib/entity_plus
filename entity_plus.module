@@ -135,6 +135,15 @@ function _entity_plus_metadata_core_modules() {
   return array_filter(array('book', 'comment', 'field', 'locale', 'node', 'taxonomy', 'user', 'system', 'statistics'), 'module_exists');
 }
 
+function entity_plus_module_implements_alter(&$implementations, $hook) {
+  if ($hook == 'entity_info_alter') {
+    // Move our hook implementation to the bottom.
+    $group = $implementations['entity_plus'];
+    unset($implementations['entity_plus']);
+    $implementations['entity_plus'] = $group;
+  }
+}
+
 /**
  * Determines whether for the given entity type a given operation is available.
  *
@@ -174,11 +183,11 @@ function entity_plus_type_supports($entity_plus_type, $op) {
 }
 
 /**
- * Implements hook_entity_plus_info_alter().
+ * Implements hook_entity_info_alter().
  *
  * @see entity_plus_module_implements_alter()
  */
-function entity_plus_entity_plus_info_alter(&$entity_plus_info) {
+function entity_plus_entity_info_alter(&$entity_plus_info) {
   _entity_plus_info_add_metadata($entity_plus_info);
 
   // Populate a default value for the 'configuration' key of all entity types.

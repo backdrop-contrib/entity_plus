@@ -5,7 +5,7 @@
  */
 
 module_load_include('inc', 'entity_plus', 'modules/callbacks');
-module_load_include('inc', 'entity_plus', 'includes/entity.property');
+module_load_include('inc', 'entity_plus', 'includes/entity_plus.property');
 
 function entity_metadata_wrapper($type, $data = NULL, array $info = array()) {
   if ($type == 'entity' || (($entity_plus_info = entity_get_info()) && isset($entity_plus_info[$type]))) {
@@ -43,23 +43,23 @@ function emw($type, $data = NULL, array $info = array()) {
 
 function entity_plus_autoload_info() {
   return array(
-    'EntityValueWrapper' => 'includes/entity.wrapper.inc',
-    'EntityStructureWrapper' => 'includes/entity.wrapper.inc',
-    'EntityListWrapper' => 'includes/entity.wrapper.inc',
-    'EntityBackdropWrapper' => 'includes/entity.wrapper.inc',
-    'EntityMetadataWrapper' => 'includes/entity.wrapper.inc',
-    'EntityMetadataWrapperException' => 'includes/entity.wrapper.inc',
-    'EntityMetadataWrapperIterator' => 'includes/entity.wrapper.inc',
-    'EntityMetadataArrayObject' => 'includes/entity.wrapper.inc',
-    'EntityDefaultMetadataController' => 'includes/entity.wrapper.inc',
-    'EntityExtraFieldsControllerInterface' => 'includes/entity.wrapper.inc',
-    'EntityDefaultExtraFieldsController' => 'includes/entity.wrapper.inc',
-    'EntityPlusControllerInterface' => 'includes/entity.controller.inc',
-    'EntityPlusControllerRevisionableInterface' => 'includes/entity.controller.inc',
-    'EntityPlusController' => 'includes/entity.controller.inc',
-    'EntityPlusControllerExportable' => 'includes/entity.controller.inc',
-    'EntityPlusControllerInterface' => 'includes/entity.controller.inc',
-    'EntityPlusControllerInterface' => 'includes/entity.controller.inc',
+    'EntityValueWrapper' => 'includes/entity_plus.wrapper.inc',
+    'EntityStructureWrapper' => 'includes/entity_plus.wrapper.inc',
+    'EntityListWrapper' => 'includes/entity_plus.wrapper.inc',
+    'EntityBackdropWrapper' => 'includes/entity_plus.wrapper.inc',
+    'EntityMetadataWrapper' => 'includes/entity_plus.wrapper.inc',
+    'EntityMetadataWrapperException' => 'includes/entity_plus.wrapper.inc',
+    'EntityMetadataWrapperIterator' => 'includes/entity_plus.wrapper.inc',
+    'EntityMetadataArrayObject' => 'includes/entity_plus.wrapper.inc',
+    'EntityDefaultMetadataController' => 'includes/entity_plus.wrapper.inc',
+    'EntityExtraFieldsControllerInterface' => 'includes/entity_plus.wrapper.inc',
+    'EntityDefaultExtraFieldsController' => 'includes/entity_plus.wrapper.inc',
+    'EntityPlusControllerInterface' => 'includes/entity_plus.controller.inc',
+    'EntityPlusControllerRevisionableInterface' => 'includes/entity_plus.controller.inc',
+    'EntityPlusController' => 'includes/entity_plus.controller.inc',
+    'EntityPlusControllerExportable' => 'includes/entity_plus.controller.inc',
+    'EntityPlusControllerInterface' => 'includes/entity_plus.controller.inc',
+    'EntityPlusControllerInterface' => 'includes/entity_plus.controller.inc',
   );
 }
 

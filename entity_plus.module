@@ -336,7 +336,7 @@ function entity_plus_view($entity_plus_type, $entities, $view_mode = 'full', $la
  * check if the user has create access.
  *
  * @code
- * $node = entity_plus_create('node', array('type' => 'page'));
+ * $node = entity_create('node', array('type' => 'page'));
  * $access = entity_plus_access('create', 'node', $node, $account);
  * @endcode
  *

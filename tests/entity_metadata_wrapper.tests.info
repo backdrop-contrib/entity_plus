@@ -1,5 +1,0 @@
-[EntityMetadataTestCase]
-name = Entity Metadata Wrapper functionality
-description = Tests metadata wrappers.
-group = Entity Metadata Wrapper
-file = entity_metadata_wrapper.test

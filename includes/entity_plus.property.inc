@@ -310,7 +310,7 @@ function entity_plus_property_values_create_entity($entity_plus_type, $values = 
   if (entity_plus_type_supports($entity_plus_type, 'create')) {
     $info = entity_get_info($entity_plus_type);
     // Create the initial entity by passing the values for all 'entity keys'
-    // to entity_plus_create().
+    // to entity_create().
     $entity_plus_keys = array_filter($info['entity keys']);
     $creation_values = array_intersect_key($values, array_flip($entity_plus_keys));
 
@@ -320,7 +320,7 @@ function entity_plus_property_values_create_entity($entity_plus_type, $values = 
     if (!empty($info['entity keys']['bundle'])) {
       $creation_values += array($info['entity keys']['bundle'] => FALSE);
     }
-    $entity = entity_plus_create($entity_plus_type, $creation_values);
+    $entity = entity_create($entity_plus_type, $creation_values);
 
     // Now set the remaining values using the wrapper.
     $wrapper = entity_metadata_wrapper($entity_plus_type, $entity);

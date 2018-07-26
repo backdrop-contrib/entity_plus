@@ -1,11 +1,23 @@
-Entity Metadata Wrapper module
+Entity Plus
 =================
 
-This module is intended to port the "wrapper" bits from the Drupal Entity API
-module.
+** If your module depends on the module `Entity Metadata Wrapper` in Backdrop
+contrib, read the following and take steps to change the dependency to this 
+module instead. **
 
-This module extends the entity API of Backdrop core in order to provide a unified
-way to deal with entities and their properties.
+This module will replace the Backdrop contrib module called Entity Metadata 
+Wrapper and will include its functionality. That module started as a port of EMW
+but then morphed into a support module for D7 ports requiring Entity API. This
+led to some confusion as to why a module might be dependent on Entity Metadata 
+Wrappers. This is an attempt to correct this. This module also renames several 
+functions from the `entity_xxx()` format to `entity_plus_xxx()` format to 
+prevent conflict with other ports which may incorporate these function names, 
+and also in case some of these functions are eventually merged into core as is
+currently proposed (e.g. `entity_save()`).
+
+This module extends the entity API of Backdrop core with additional helper
+functions, an entity controller compatible with the Drupal Entity API and
+also the Drupal 7 Entity Metadata Wrappers functionality.
 
 This is an API module. You only need to enable it if a module depends on it or
 you are interested in using it for development.
@@ -16,7 +28,7 @@ HOW TO INSTALL:
 https://backdropcms.org/guide/modules
 
 
-Usage
+Entity Metadata Wrappers usage
 ---------------
 
 * This module introduces a unique place for metadata about entity properties:

@@ -657,7 +657,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
     if (!empty($this->entityInfo['fieldable'])) {
       field_attach_prepare_view($this->entityType, $entities, $view_mode);
     }
-    entity_plus_prepare_view($this->entityType, $entities);
+    entity_prepare_view($this->entityType, $entities);
     $langcode = isset($langcode) ? $langcode : $GLOBALS['language_content']->langcode;
 
     $view = array();

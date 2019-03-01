@@ -324,7 +324,7 @@ function entity_plus_view($entity_plus_type, $entities, $view_mode = 'full', $la
     return $info['view callback']($entities, $view_mode, $langcode, $entity_plus_type);
   }
   elseif (in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
-    return entity_plus_get_controller($entity_plus_type)->view($entities, $view_mode, $langcode, $page);
+    return entity_get_controller($entity_plus_type)->view($entities, $view_mode, $langcode, $page);
   }
   return FALSE;
 }
@@ -456,7 +456,7 @@ function entity_plus_build_content($entity_plus_type, $entity, $view_mode = 'ful
     return $entity->buildContent($view_mode, $langcode);
   }
   elseif (in_array('EntityControllerInterface', class_implements($info['controller class']))) {
-    return entity_plus_get_controller($entity_plus_type)->buildContent($entity, $view_mode, $langcode);
+    return entity_get_controller($entity_plus_type)->buildContent($entity, $view_mode, $langcode);
   }
 }
 
@@ -804,7 +804,7 @@ function entity_plus_save($entity_plus_type, $entity) {
     $info['save callback']($entity);
   }
   elseif (in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
-    return entity_plus_get_controller($entity_plus_type)->save($entity);
+    return entity_get_controller($entity_plus_type)->save($entity);
   }
   else {
     return FALSE;

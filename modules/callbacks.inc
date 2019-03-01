@@ -799,7 +799,7 @@ function entity_plus_metadata_taxonomy_access($op, $entity = NULL, $account = NU
   if ($entity_plus_type == 'taxonomy_vocabulary') {
     return user_access('administer taxonomy', $account);
   }
-  if (isset($entity) && $op == 'update' && !isset($account) && taxonomy_term_edit_access($entity)) {
+  if (isset($entity) && $op == 'update' && !isset($account) && user_access("edit terms in {$entity->vocabulary}")) {
     return TRUE;
   }
   if (user_access('administer taxonomy', $account) || user_access('access content', $account) && $op == 'view') {

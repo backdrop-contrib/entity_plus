@@ -600,8 +600,8 @@ function entity_plus_revision_is_default($entity_plus_type, $entity) {
  * Sets a given entity revision as default revision.
  *
  * Note that the default revision flag will only be supported by entity types
- * based upon the EntityAPIController, i.e. implementing the
- * EntityAPIControllerRevisionableInterface.
+ * based upon the EntityPlusController, i.e. implementing the
+ * EntityPlusControllerRevisionableInterface.
  *
  * @param $entity_plus_type
  *   The type of the entity.

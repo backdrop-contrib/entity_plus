@@ -575,7 +575,7 @@ function entity_plus_revision_delete($entity_plus_type, $revision_id) {
  *
  * @see entity_revision_set_default()
  */
-function entity_plus_revision_is_default($entity_type, $entity) {
+function entity_plus_revision_is_default($entity_plus_type, $entity) {
   $info = entity_get_info($entity_plus_type);
   if (empty($info['entity keys']['revision'])) {
     return TRUE;
@@ -591,7 +591,7 @@ function entity_plus_revision_is_default($entity_type, $entity) {
   else {
     // Else, just load the default entity and compare the ID. Usually, the
     // entity should be already statically cached anyway.
-    $default = entity_load($entity_type, $entity->{$info['entity keys']['id']});
+    $default = entity_load($entity_plus_type, $entity->{$info['entity keys']['id']});
     return $default->{$info['entity keys']['revision']} == $entity->{$info['entity keys']['revision']};
   }
 }

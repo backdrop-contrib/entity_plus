@@ -667,7 +667,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
         // If the entity type provides an implementation, use this instead the
         // generic one.
         // @see template_preprocess_entity()
-        '#theme' => 'entity',
+        '#theme' => 'entity_plus',
         '#entity_plus_type' => $this->entityType,
         '#entity' => $entity,
         '#view_mode' => $view_mode,

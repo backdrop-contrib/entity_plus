@@ -94,9 +94,11 @@ for complete text.
 CURRENT MAINTAINERS
 ---------------    
 
-Looking for maintainers
+- [Laryn Kragt Bakker](https://github.com/laryn) - [CEDC.org](https://cedc.org)
+- Seeking co-maintainers
 
 CREDITS   
 --------------- 
 
-Original Drupal version by Wolfgang Ziegler, nuppla@zites.net
+- Original Drupal version by [Wolfgang Ziegler](https://www.drupal.org/user/16747)
+- Ported to Backdrop by [docwilmot](https://github.com/docwilmot)

@@ -29,10 +29,10 @@ function template_process_entity_plus_property(&$variables, $hook) {
  */
 function template_preprocess_entity_plus(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
-  $entity_type = $variables['elements']['#entity_type'];
+  $entity_type = $variables['elements']['#entity_plus_type'];
   $variables['entity_type'] = $entity_type;
   $entity = $variables['elements']['#entity'];
-  $variables[$variables['elements']['#entity_type']] = $entity;
+  $variables[$entity_type] = $entity;
   $info = entity_get_info($entity_type);
 
   $variables['title'] = check_plain(entity_label($entity_type, $entity));

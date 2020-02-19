@@ -28,9 +28,9 @@
  * @see template_process()
  */
 ?>
-<div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
+<div class="<?php print implode(' ', $classes); ?>"<?php (!empty($attributes)) ? '' : print backdrop_attributes($attributes); ?>>
   <?php if (!$page): ?>
-    <h2<?php print backdrop_attributes($title_attributes); ?>>
+    <h2<?php (empty($title_attributes)) ? '' : print backdrop_attributes($title_attributes); ?>>
       <?php if ($url): ?>
         <a href="<?php print $url; ?>"><?php print $title; ?></a>
       <?php else: ?>
@@ -39,7 +39,7 @@
     </h2>
   <?php endif; ?>
 
-  <div class="content"<?php print backdrop_attributes($content_attributes); ?>>
+  <div class="content"<?php (empty($content_attributes)) ? '' : print backdrop_attributes($content_attributes); ?>>
     <?php
       print render($content);
     ?>

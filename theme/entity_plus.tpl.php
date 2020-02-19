@@ -28,7 +28,7 @@
  * @see template_process()
  */
 ?>
-<div class="<?php print implode(' ', $classes); ?>"<?php (!empty($attributes)) ? '' : print backdrop_attributes($attributes); ?>>
+<div class="<?php print implode(' ', $classes); ?>"<?php (empty($attributes)) ? '' : print backdrop_attributes($attributes); ?>>
   <?php if (!$page): ?>
     <h2<?php (empty($title_attributes)) ? '' : print backdrop_attributes($title_attributes); ?>>
       <?php if ($url): ?>

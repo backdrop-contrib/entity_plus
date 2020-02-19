@@ -151,7 +151,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
 
   /**
    * Overridden.
-   * @see BackdropDefaultEntityController#__construct()
+   * @see DefaultEntityController#__construct()
    */
   public function __construct($entityType) {
     parent::__construct($entityType);
@@ -164,7 +164,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
   }
 
   /**
-   * Overrides BackdropDefaultEntityController::buildQuery().
+   * Overrides DefaultEntityController::buildQuery().
    */
   protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);

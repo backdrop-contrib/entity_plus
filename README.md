@@ -1,15 +1,11 @@
 Entity Plus
 =================
 
-** If your module depends on the module `Entity Metadata Wrapper` in Backdrop
-contrib, read the following and take steps to change the dependency to this 
-module instead. **
-
-This module will replace the Backdrop contrib module called Entity Metadata 
-Wrapper and will include its functionality. That module started as a port of EMW
+This module will replace the Backdrop contrib module called `Entity Metadata 
+Wrapper` and will include its functionality. That module started as a port of EMW
 but then morphed into a support module for D7 ports requiring Entity API. This
 led to some confusion as to why a module might be dependent on Entity Metadata 
-Wrappers. This is an attempt to correct this. This module also renames several 
+Wrappers. This is an attempt to correct that. This module also renames several 
 functions from the `entity_xxx()` format to `entity_plus_xxx()` format to 
 prevent conflict with other ports which may incorporate these function names, 
 and also in case some of these functions are eventually merged into core as is
@@ -95,6 +91,7 @@ CURRENT MAINTAINERS
 ---------------    
 
 - [Laryn Kragt Bakker](https://github.com/laryn) - [CEDC.org](https://cedc.org)
+- [Joseph Flatt](https://github.com/hosef)
 - Seeking co-maintainers
 
 CREDITS   

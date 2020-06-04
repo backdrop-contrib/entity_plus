@@ -148,6 +148,8 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
   protected $cacheComplete = FALSE;
   protected $bundleKey;
   protected $defaultRevisionKey;
+  protected $staticCache;
+  protected $persistentCache;
 
   /**
    * Overridden.
@@ -161,6 +163,13 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
       $this->bundleKey = $info['bundle keys']['bundle'];
     }
     $this->defaultRevisionKey = !empty($this->entityInfo['entity keys']['default revision']) ? $this->entityInfo['entity keys']['default revision'] : 'default_revision';
+
+    // @todo: Remove this in a future version of the module.
+    // Compatibility with versions of backdrop older than 1.16.x.
+    if (isset($this->cache)) {
+      $this->staticCache = $this->cache;
+      $this->persistentCache = FALSE;
+    }
   }
 
   /**
@@ -219,7 +228,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
     $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
 
     // Try to load entities from the static cache.
-    if ($this->cache && !$revision_id) {
+    if ($this->staticCache && !$revision_id) {
       $entities = $this->cacheGet($ids, $conditions);
       // If any entities were loaded, remove them from the ids still to load.
       if ($passed_ids) {
@@ -227,17 +236,28 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
       }
     }
 
-    // Support the entitycache module if activated.
-    if (!empty($this->entityInfo['entity cache']) && !$revision_id && $ids && !$conditions) {
-      $cached_entities = EntityCacheControllerHelper::entityCacheGet($this, $ids, $conditions);
-      // If any entities were loaded, remove them from the ids still to load.
-      $ids = array_diff($ids, array_keys($cached_entities));
+    // Try to load entities from the persistent cache.
+    if ($this->persistentCache && !$revision_id && $ids && !$conditions) {
+      $cached_entities = array();
+      if ($ids && !$conditions) {
+        $cached = cache_get_multiple($ids, 'cache_entity_' . $this->entityType);
+
+        if ($cached) {
+          foreach ($cached as $item) {
+            $cached_entities[$item->cid] = $item->data;
+          }
+        }
+      }
       $entities += $cached_entities;
 
-      // Add loaded entities to the static cache if we are not loading a
-      // revision.
-      if ($this->cache && !empty($cached_entities) && !$revision_id) {
-        $this->cacheSet($cached_entities);
+      // If any entities were loaded, remove them from the ids still to load.
+      $ids = array_diff($ids, array_keys($cached_entities));
+
+      if ($this->staticCache) {
+        // Add entities to the cache if we are not loading a revision.
+        if (!empty($cached_entities) && !$revision_id) {
+          $this->cacheSet($cached_entities);
+        }
       }
     }
 
@@ -282,13 +302,22 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
       $entities += $queried_entities;
     }
 
-    // Entitycache module support: Add entities to the entity cache if we are
-    // not loading a revision.
-    if (!empty($this->entityInfo['entity cache']) && !empty($queried_entities) && !$revision_id) {
-      EntityCacheControllerHelper::entityCacheSet($this, $queried_entities);
+    // Add entities to the entity cache if we are not loading a revision.
+    if ($this->persistentCache && !empty($queried_entities) && !$revision_id) {
+      // Only cache the entities which were loaded by ID. Entities that were
+      // loaded based on conditions will never be found via cacheGet() and we
+      // would keep on caching them.
+      if ($passed_ids) {
+        $queried_entities_by_id = array_intersect_key($queried_entities, $passed_ids);
+        if (!empty($queried_entities_by_id)) {
+          foreach ($queried_entities_by_id as $id => $item) {
+            cache_set($id, $item, 'cache_entity_' . $this->entityType);
+          }
+        }
+      }
     }
 
-    if ($this->cache) {
+    if ($this->staticCache) {
       // Add entities to the cache if we are not loading a revision.
       if (!empty($queried_entities) && !$revision_id) {
         $this->cacheSet($queried_entities);
@@ -316,10 +345,6 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
   public function resetCache(array $ids = NULL) {
     $this->cacheComplete = FALSE;
     parent::resetCache($ids);
-    // Support the entitycache module.
-    if (!empty($this->entityInfo['entity cache'])) {
-      EntityCacheControllerHelper::resetEntityCache($this, $ids);
-    }
   }
 
   /**

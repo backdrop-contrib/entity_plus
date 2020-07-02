@@ -7,6 +7,44 @@
 module_load_include('inc', 'entity_plus', 'modules/callbacks');
 module_load_include('inc', 'entity_plus', 'includes/entity_plus.property');
 
+/**
+ * Defines status codes used for exportable entities.
+ */
+
+/**
+ * A bit flag used to let us know if an entity is in the database.
+ */
+
+
+/**
+ * A bit flag used to let us know if an entity has been customly defined.
+ */
+define('ENTITY_CUSTOM', 0x01);
+
+/**
+ * Deprecated, but still here for backward compatibility.
+ */
+define('ENTITY_IN_DB', 0x01);
+
+/**
+ * A bit flag used to let us know if an entity is a 'default' in code.
+ */
+define('ENTITY_IN_CODE', 0x02);
+
+/**
+ * A bit flag used to mark entities as overridden, e.g. they were originally
+ * definded in code and are saved now in the database. Same as
+ * (ENTITY_CUSTOM | ENTITY_IN_CODE).
+ */
+define('ENTITY_OVERRIDDEN', 0x03);
+
+/**
+ * A bit flag used to mark entities as fixed, thus not changeable for any
+ * user.
+ */
+define('ENTITY_FIXED', 0x04 | 0x02);
+
+
 function entity_metadata_wrapper($type, $data = NULL, array $info = array()) {
   if ($type == 'entity' || (($entity_plus_info = entity_get_info()) && isset($entity_plus_info[$type]))) {
     // If the passed entity is the global $user, we load the user object by only

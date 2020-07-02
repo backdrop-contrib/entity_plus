@@ -10,7 +10,7 @@
  */
 function entity_plus_metadata_entity_plus_get_properties($entity, array $options, $name, $entity_plus_type) {
   if ($name == 'url') {
-    $return = entity_plus_uri($entity_plus_type, $entity);
+    $return = entity_uri($entity_plus_type, $entity);
     return url($return['path'], $return['options'] + $options);
   }
 }
@@ -365,7 +365,7 @@ function entity_plus_metadata_user_get_properties($account, array $options, $nam
       if (empty($account->uid)) {
         return NULL;
       }
-      $return = entity_plus_uri('user', $account);
+      $return = entity_uri('user', $account);
       return $return ? url($return['path'], $return['options'] + $options) : '';
 
     case 'edit_url':
@@ -1067,7 +1067,7 @@ function entity_plus_metadata_field_query($entity_plus_type, $property, $value, 
 }
 
 /**
- * Implements entity_plus_uri() callback for file entities.
+ * Implements entity_uri() callback for file entities.
  */
 function entity_plus_metadata_uri_file($file) {
   return array(

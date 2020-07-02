@@ -111,7 +111,7 @@ interface EntityPlusControllerInterface extends EntityControllerInterface {
    *   in another context. If FALSE the entity will be displayed with its title
    *   in a mode suitable for lists.
    *   If unset, the page mode will be enabled if the current path is the URI
-   *   of the entity, as returned by entity_plus_uri().
+   *   of the entity, as returned by entity_uri().
    *   This parameter is only supported for entities which controller is a
    *   EntityPlusControllerInterface.
    * @return

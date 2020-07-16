@@ -34,7 +34,7 @@ function entity_metadata_wrapper($type, $data = NULL, array $info = array()) {
  *
  * @return EntityMetadataWrapper
  *   Dependend on the passed data the right wrapper is returned.
- *  
+ *
  * @see entity_metadata_wrapper()
  */
 function emw($type, $data = NULL, array $info = array()) {
@@ -309,7 +309,7 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
  *   in another context. If FALSE the entity will be displayed with its title
  *   in a mode suitable for lists.
  *   If unset, the page mode will be enabled if the current path is the URI
- *   of the entity, as returned by entity_plus_uri().
+ *   of the entity, as returned by entity_uri().
  *   This parameter is only supported for entities which controller is a
  *   EntityPlusControllerInterface.
  * @return
@@ -921,5 +921,3 @@ function entity_plus_theme() {
     ),
   );
 }
-
-

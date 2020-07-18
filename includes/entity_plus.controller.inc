@@ -769,7 +769,7 @@ class EntityPlusControllerExportable extends EntityPlusController {
     $passed_ids = !empty($ids) ? array_flip($ids) : FALSE;
 
     // Care about the static cache.
-    if ($this->cache && !$revision_id) {
+    if ($this->staticCache && !$revision_id) {
       $entities = $this->cacheGetByName($ids, $conditions);
     }
     // If any entities were loaded, remove them from the ids still to load.

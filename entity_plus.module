@@ -4,6 +4,43 @@
  * Returns a property wrapper for given data.
  */
 
+ /**
+  * Defines status codes used for exportable entities.
+  */
+
+ /**
+  * A bit flag used to let us know if an entity is in the database.
+  */
+
+
+ /**
+  * A bit flag used to let us know if an entity has been customly defined.
+  */
+ define('ENTITY_CUSTOM', 0x01);
+
+ /**
+  * Deprecated, but still here for backward compatibility.
+  */
+ define('ENTITY_IN_DB', 0x01);
+
+ /**
+  * A bit flag used to let us know if an entity is a 'default' in code.
+  */
+ define('ENTITY_IN_CODE', 0x02);
+
+ /**
+  * A bit flag used to mark entities as overridden, e.g. they were originally
+  * definded in code and are saved now in the database. Same as
+  * (ENTITY_CUSTOM | ENTITY_IN_CODE).
+  */
+ define('ENTITY_OVERRIDDEN', 0x03);
+
+ /**
+  * A bit flag used to mark entities as fixed, thus not changeable for any
+  * user.
+  */
+ define('ENTITY_FIXED', 0x04 | 0x02);
+
 module_load_include('inc', 'entity_plus', 'modules/callbacks');
 module_load_include('inc', 'entity_plus', 'includes/entity_plus.property');
 
@@ -912,6 +949,10 @@ function entity_plus_theme() {
   $pattern = '(' . implode('|', $types) . ')(\.|__)';
 
   return array(
+		'entity_plus_status' => array(
+      'variables' => array('status' => NULL, 'html' => TRUE),
+      'file' => 'theme/entity_plus.theme.inc',
+    ),
     'entity_plus' => array(
       'render element' => 'elements',
       'template' => 'entity_plus',

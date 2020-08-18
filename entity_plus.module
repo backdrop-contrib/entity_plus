@@ -5,16 +5,11 @@
  */
 
  /**
-  * Defines status codes used for exportable entities.
+  * Define status codes used for exportable entities.
   */
 
  /**
   * A bit flag used to let us know if an entity is in the database.
-  */
-
-
- /**
-  * A bit flag used to let us know if an entity has been customly defined.
   */
  define('ENTITY_CUSTOM', 0x01);
 
@@ -948,17 +943,17 @@ function entity_plus_theme() {
   }
   $pattern = '(' . implode('|', $types) . ')(\.|__)';
 
-  return array(
+	return array(
 		'entity_plus_status' => array(
-      'variables' => array('status' => NULL, 'html' => TRUE),
-      'file' => 'theme/entity_plus.theme.inc',
-    ),
-    'entity_plus' => array(
-      'render element' => 'elements',
-      'template' => 'entity_plus',
-      'pattern' => $pattern,
-      'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
-      'file' => 'entity_plus.theme.inc',
-    ),
-  );
+			'variables' => array('status' => NULL, 'html' => TRUE),
+			'file' => 'theme/entity_plus.theme.inc',
+		),
+		'entity_plus' => array(
+			'render element' => 'elements',
+			'template' => 'entity_plus',
+			'pattern' => $pattern,
+			'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
+			'file' => 'entity_plus.theme.inc',
+		),
+	);
 }

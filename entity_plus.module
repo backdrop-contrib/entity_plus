@@ -650,7 +650,6 @@ function entity_plus_revision_set_default($entity_plus_type, $entity) {
   }
 }
 
-
 /**
  * Checks if a given entity has a certain exportable status.
  *

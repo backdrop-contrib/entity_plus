@@ -943,17 +943,17 @@ function entity_plus_theme() {
   }
   $pattern = '(' . implode('|', $types) . ')(\.|__)';
 
-	return array(
-		'entity_plus_status' => array(
-			'variables' => array('status' => NULL, 'html' => TRUE),
-			'file' => 'theme/entity_plus.theme.inc',
-		),
-		'entity_plus' => array(
-			'render element' => 'elements',
-			'template' => 'entity_plus',
-			'pattern' => $pattern,
-			'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
-			'file' => 'entity_plus.theme.inc',
-		),
-	);
+  return array(
+    'entity_plus_status' => array(
+      'variables' => array('status' => NULL, 'html' => TRUE),
+      'file' => 'theme/entity_plus.theme.inc',
+    ),
+    'entity_plus' => array(
+      'render element' => 'elements',
+      'template' => 'entity_plus',
+      'pattern' => $pattern,
+      'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
+      'file' => 'entity_plus.theme.inc',
+    ),
+  );
 }

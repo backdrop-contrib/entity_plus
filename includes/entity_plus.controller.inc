@@ -393,6 +393,9 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
     // Invoke the respective entity level hook.
     if ($hook == 'presave' || $hook == 'insert' || $hook == 'update' || $hook == 'delete') {
       if (is_a($entity, 'Entity')) {
+	// Invoke all regular entity hooks as well as entity_plus hooks.
+	// See https://github.com/backdrop-contrib/entity_plus/issues/35
+	module_invoke_all('entity_' . $hook, $entity, $this->entityType);
         module_invoke_all('entity_plus_' . $hook, $entity, $this->entityType);
       }
     }

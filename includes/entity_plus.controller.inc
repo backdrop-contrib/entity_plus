@@ -27,6 +27,21 @@ interface EntityPlusControllerInterface extends EntityControllerInterface {
    */
   public function invoke($hook, $entity);
 
+	/**
+   * Checks if the entity has a certain exportable status.
+   *
+   * @param $status
+   *   A status constant, i.e. one of ENTITY_CUSTOM, ENTITY_IN_CODE,
+   *   ENTITY_OVERRIDDEN or ENTITY_FIXED.
+   *
+   * @return bool
+   *   For exportable entities TRUE if the entity has the status, else FALSE.
+   *   In case the entity is not exportable, NULL is returned.
+   *
+   * @see entity_has_status()
+   */
+  public function hasStatus($status);
+
   /**
    * Permanently saves the given entity.
    *
@@ -448,6 +463,15 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
       return TRUE;
     }
     return FALSE;
+  }
+
+	/**
+   * {@inheritdoc}
+   */
+  public function hasStatus($status) {
+    if (!empty($this->entityInfo['exportable'])) {
+      return isset($this->{$this->statusKey}) && ($this->{$this->statusKey} & $status) == $status;
+    }
   }
 
   /**

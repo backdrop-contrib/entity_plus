@@ -12,7 +12,7 @@
   * See: https://github.com/backdrop-contrib/entity_plus/issues/20
   */
 
-if (!defined('ENTITY_CUSTOM')) {
+if (!defined('ENTITY_CUSTOM') && !module_exists('entity_ui')) {
   /**
   * A bit flag used to let us know if an entity is in the database.
   */

@@ -42,7 +42,7 @@ class entity_plus_views_handler_field_entity extends views_handler_field {
    */
   public function init(&$view, &$options) {
     parent::init($view, $options);
-    $this->field_entity_type = entity_property_extract_innermost_type($this->definition['type']);
+    $this->field_entity_type = entity_plus_property_extract_innermost_type($this->definition['type']);
   }
 
   /**

@@ -10,14 +10,14 @@
 /**
  * Get the entity property info array of an entity type.
  *
- * @param $entity_plus_type
+ * @param $entity_type
  *   The entity type, e.g. node, for which the info shall be returned, or NULL
  *   to return an array with info about all types.
  *
  * @see hook_entity_property_info()
  * @see hook_entity_property_info_alter()
  */
-function entity_plus_get_property_info($entity_plus_type = NULL) {
+function entity_plus_get_property_info($entity_type = NULL) {
   // Use the advanced backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
@@ -41,7 +41,7 @@ function entity_plus_get_property_info($entity_plus_type = NULL) {
     }
   }
 
-  return empty($entity_plus_type) ? $info : (isset($info[$entity_plus_type]) ? $info[$entity_plus_type] : array());
+  return empty($entity_type) ? $info : (isset($info[$entity_type]) ? $info[$entity_type] : array());
 }
 
 /**
@@ -66,24 +66,24 @@ function entity_plus_property_info_defaults() {
  * all properties the entity might have, thus it adds an all properties assigned
  * to entity bundles.
  *
- * @param $entity_plus_type
+ * @param $entity_type
  *   (optiona) The entity type to return properties for.
  *
  * @return
  *   An array of info about properties. If the type is ommitted, all known
  *   properties are returned.
  */
-function entity_plus_get_all_property_info($entity_plus_type = NULL) {
-  if (!isset($entity_plus_type)) {
+function entity_plus_get_all_property_info($entity_type = NULL) {
+  if (!isset($entity_type)) {
     // Retrieve all known properties.
     $properties = array();
-    foreach (entity_get_info() as $entity_plus_type => $info) {
-      $properties += entity_plus_get_all_property_info($entity_plus_type);
+    foreach (entity_get_info() as $entity_type => $info) {
+      $properties += entity_plus_get_all_property_info($entity_type);
     }
     return $properties;
   }
   // Else retrieve the properties of the given entity type only.
-  $info = entity_plus_get_property_info($entity_plus_type);
+  $info = entity_plus_get_property_info($entity_type);
   $info += array('properties' => array(), 'bundles' => array());
   // Add all bundle properties.
   foreach ($info['bundles'] as $bundle => $bundle_info) {
@@ -96,7 +96,7 @@ function entity_plus_get_all_property_info($entity_plus_type = NULL) {
 /**
  * Queries for entities having the given property value.
  *
- * @param $entity_plus_type
+ * @param $entity_type
  *   The type of the entity.
  * @param $property
  *   The name of the property to query for.
@@ -109,8 +109,8 @@ function entity_plus_get_all_property_info($entity_plus_type = NULL) {
  *   An array of entity ids or NULL if there is no information how to query for
  *   the given property.
  */
-function entity_plus_property_query($entity_plus_type, $property, $value, $limit = 30) {
-  $properties = entity_plus_get_all_property_info($entity_plus_type);
+function entity_plus_property_query($entity_type, $property, $value, $limit = 30) {
+  $properties = entity_plus_get_all_property_info($entity_type);
   $info = $properties[$property] + array('type' => 'text', 'queryable' => !empty($properties[$property]['schema field']));
 
   // We still support the deprecated query callback, so just add in EFQ-based
@@ -134,7 +134,7 @@ function entity_plus_property_query($entity_plus_type, $property, $value, $limit
   $value = $wrapper->value(array('identifier' => TRUE));
 
   if (!empty($info['query callback'])) {
-    return $info['query callback']($entity_plus_type, $property, $value, $limit);
+    return $info['query callback']($entity_type, $property, $value, $limit);
   }
 }
 
@@ -292,7 +292,7 @@ function entity_plus_property_verify_data_type($data, $type) {
 /**
  * Creates the entity object for an array of given property values.
  *
- * @param $entity_plus_type
+ * @param $entity_type
  *   The entity type to create an entity for.
  * @param $values
  *   An array of values as described by the entity's property info. All entity
@@ -306,9 +306,9 @@ function entity_plus_property_verify_data_type($data, $type) {
  *   An EntityBackdropWrapper wrapping the newly created entity or FALSE, if
  *   there were no information how to create the entity.
  */
-function entity_plus_property_values_create_entity($entity_plus_type, $values = array()) {
-  if (entity_plus_type_supports($entity_plus_type, 'create')) {
-    $info = entity_get_info($entity_plus_type);
+function entity_plus_property_values_create_entity($entity_type, $values = array()) {
+  if (entity_plus_type_supports($entity_type, 'create')) {
+    $info = entity_get_info($entity_type);
     // Create the initial entity by passing the values for all 'entity keys'
     // to entity_create().
     $entity_plus_keys = array_filter($info['entity keys']);
@@ -320,10 +320,10 @@ function entity_plus_property_values_create_entity($entity_plus_type, $values = 
     if (!empty($info['entity keys']['bundle'])) {
       $creation_values += array($info['entity keys']['bundle'] => FALSE);
     }
-    $entity = entity_create($entity_plus_type, $creation_values);
+    $entity = entity_create($entity_type, $creation_values);
 
     // Now set the remaining values using the wrapper.
-    $wrapper = entity_metadata_wrapper($entity_plus_type, $entity);
+    $wrapper = entity_metadata_wrapper($entity_type, $entity);
     foreach ($values as $key => $value) {
       if (!in_array($key, $info['entity keys'])) {
         if (isset($wrapper->$key)) {

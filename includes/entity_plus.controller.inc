@@ -638,7 +638,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
 
     // Allow modules to change the view mode.
     $context = array(
-      'entity_plus_type' => $this->entityType,
+      'entity_type' => $this->entityType,
       'entity' => $entity,
       'langcode' => $langcode,
     );
@@ -694,7 +694,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
       '#theme' => 'entity_plus_property',
       '#property_name' => $name,
       '#access' => $property->access('view'),
-      '#entity_plus_type' => $this->entityType,
+      '#entity_type' => $this->entityType,
     );
     $content['#attached']['css']['entity.theme'] = backdrop_get_path('module', 'entity') . '/theme/entity.theme.css';
   }
@@ -720,7 +720,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
         // generic one.
         // @see template_preprocess_entity()
         '#theme' => 'entity_plus',
-        '#entity_plus_type' => $this->entityType,
+        '#entity_type' => $this->entityType,
         '#entity' => $entity,
         '#view_mode' => $view_mode,
         '#language' => $langcode,

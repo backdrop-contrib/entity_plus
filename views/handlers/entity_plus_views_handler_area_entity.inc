@@ -111,7 +111,7 @@ class entity_plus_views_handler_area_entity extends views_handler_area {
     if (!empty($entity_type) && !empty($entity_id) && !empty($view_mode)) {
       $entity = entity_load_single($entity_type, $entity_id);
       if (!empty($this->options['bypass_access']) || entity_access('view', $entity_type, $entity)) {
-        $render = entity_view($entity_type, array($entity), $view_mode);
+        $render = entity_plus_view($entity_type, array($entity), $view_mode);
         $render_entity = reset($render);
         return backdrop_render($render_entity);
       }

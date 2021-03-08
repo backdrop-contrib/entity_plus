@@ -6,7 +6,7 @@
  */
 
 /**
- * Plugin class for displaying Views results with entity_view.
+ * Plugin class for displaying Views results with entity_plus_view.
  */
 class entity_plus_views_plugin_row_entity_view extends views_plugin_row {
 
@@ -73,7 +73,7 @@ class entity_plus_views_plugin_row_entity_view extends views_plugin_row {
     }
     // Render the entities.
     if ($this->entities) {
-      $render = entity_view($this->entity_type, $this->entities, $this->options['view_mode']);
+      $render = entity_plus_view($this->entity_type, $this->entities, $this->options['view_mode']);
       // Remove the first level of the render array.
       $this->rendered_content = reset($render);
     }

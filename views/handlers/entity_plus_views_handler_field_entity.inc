@@ -188,7 +188,7 @@ class entity_plus_views_handler_field_entity extends views_handler_field {
     }
 
     if ($this->options['display'] === 'view') {
-      $entity_view = entity_view($type, array($entity), $this->options['view_mode']);
+      $entity_view = entity_plus_view($type, array($entity), $this->options['view_mode']);
       return render($entity_view);
     }
 

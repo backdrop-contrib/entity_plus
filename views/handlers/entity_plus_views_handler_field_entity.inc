@@ -197,7 +197,7 @@ class entity_plus_views_handler_field_entity extends views_handler_field {
     }
     // Either $options[display] == 'id', or we have no label.
     if (empty($value)) {
-      $value = entity_id($type, $entity);
+      $value = entity_plus_id($type, $entity);
     }
     $value = $this->sanitize_value($value);
 

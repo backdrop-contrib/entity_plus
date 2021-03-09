@@ -91,7 +91,7 @@ class entity_plus_views_plugin_row_entity_view extends views_plugin_row {
       // Add the view object as views_plugin_row_node_view::render() would.
       // Otherwise the views theme suggestions won't work properly.
       $entity->view = $this->view;
-      $render = $this->rendered_content[entity_id($this->entity_type, $entity)];
+      $render = $this->rendered_content[entity_plus_id($this->entity_type, $entity)];
       return backdrop_render($render);
     }
   }

@@ -227,7 +227,7 @@ function entity_plus_type_supports($entity_plus_type, $op) {
     return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));
   }
   if ($op == 'form') {
-    return (bool) entity_plus_ui_controller($entity_plus_type);
+    return (bool) entity_ui_controller($entity_plus_type);
   }
   if ($op != 'access') {
     return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));

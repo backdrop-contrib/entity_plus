@@ -682,21 +682,22 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
   }
 
   /**
-   * Renders a single entity property.
+   * Creates a render array for a single entity property.
    */
   protected function renderEntityProperty($wrapper, $name, $property, $view_mode, $langcode, &$content) {
     $info = $property->info();
 
     $content[$name] = array(
-      '#label_hidden' => FALSE,
+      '#label_display' => 'above', // Options are 'above', 'inline', 'hidden'
       '#label' => $info['label'],
       '#entity_plus_wrapped' => $wrapper,
       '#theme' => 'entity_plus_property',
       '#property_name' => $name,
       '#access' => $property->access('view'),
-      '#entity_plus_type' => $this->entityType,
+      '#entity_type' => $this->entityType,
+      '#access' => !(empty($property->value())), // hide display for empty properties
     );
-    $content['#attached']['css']['entity.theme'] = backdrop_get_path('module', 'entity') . '/theme/entity.theme.css';
+    $content['#attached']['css']['entity_plus.theme'] = backdrop_get_path('module', 'entity_plus') . '/theme/entity_plus.theme.css';
   }
 
   /**

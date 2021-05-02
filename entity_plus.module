@@ -975,5 +975,10 @@ function entity_plus_theme() {
       'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
       'file' => 'entity_plus.theme.inc',
     ),
+    'entity_plus_property' => array(
+      'render element' => 'elements',
+      'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
+      'file' => 'entity_plus.theme.inc',
+    ),
   );
 }

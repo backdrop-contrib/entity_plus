@@ -99,7 +99,7 @@ function entity_plus_autoload_info() {
     'EntityPlusControllerExportable' => 'includes/entity_plus.controller.inc',
     'EntityPlusFieldHandlerHelper' => 'views/handlers/entity_plus_views_field_handler_helper.inc',
     'entity_plus_views_handler_area_entity' => 'views/handlers/entity_plus_views_handler_area_entity.inc',
-    'entity_plus_views_handler_field_boolean' => 'views/handlers/entity_plus_views_handler_field_boolian.inc',
+    'entity_plus_views_handler_field_boolean' => 'views/handlers/entity_plus_views_handler_field_boolean.inc',
     'entity_plus_views_handler_field_date' => 'views/handlers/entity_plus_views_handler_field_date.inc',
     'entity_plus_views_handler_field_duration' => 'views/handlers/entity_plus_views_handler_field_duration.inc',
     'entity_plus_views_handler_field_entity' => 'views/handlers/entity_plus_views_handler_field_entity.inc',

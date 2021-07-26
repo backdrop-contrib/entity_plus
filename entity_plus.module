@@ -97,8 +97,6 @@ function entity_plus_autoload_info() {
     'EntityPlusControllerRevisionableInterface' => 'includes/entity_plus.controller.inc',
     'EntityPlusController' => 'includes/entity_plus.controller.inc',
     'EntityPlusControllerExportable' => 'includes/entity_plus.controller.inc',
-    'EntityPlusControllerInterface' => 'includes/entity_plus.controller.inc',
-    'EntityPlusControllerInterface' => 'includes/entity_plus.controller.inc',
     'EntityPlusFieldHandlerHelper' => 'views/handlers/entity_plus_views_field_handler_helper.inc',
     'entity_plus_views_handler_area_entity' => 'views/handlers/entity_plus_views_handler_area_entity.inc',
     'entity_plus_views_handler_field_boolean' => 'views/handlers/entity_plus_views_handler_field_boolian.inc',

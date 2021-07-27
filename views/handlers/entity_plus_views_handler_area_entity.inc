@@ -31,7 +31,7 @@ class entity_plus_views_handler_area_entity extends views_handler_area {
       '#description' => t('Choose the entity type you want to display in the area.'),
       '#default_value' => $entity_type,
       '#ajax' => array(
-        'path' => views_ui_build_form_url($form_state),
+        'path' => views_ui_build_form_path($form_state),
       ),
       '#submit' => array('views_ui_config_item_form_submit_temporary'),
       '#executes_submit_callback' => TRUE,

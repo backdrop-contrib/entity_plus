@@ -201,6 +201,9 @@ function entity_plus_field_info_alter(&$field_info) {
     $field_info['image']['property_callbacks'][] = 'entity_plus_metadata_field_file_callback';
     $field_info['image']['property_callbacks'][] = 'entity_plus_metadata_field_image_callback';
   }
+  if (module_exists('email')) {
+    $field_info['email']['property_type'] = 'text';
+  }
 }
 
 /**

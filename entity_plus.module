@@ -226,7 +226,7 @@ function entity_plus_type_supports($entity_plus_type, $op) {
   if ($op == 'revision delete') {
     return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));
   }
-  if ($op == 'form') {
+  if ($op == 'form' && module_exists('entity_ui')) {
     return (bool) entity_ui_controller($entity_plus_type);
   }
   if ($op != 'access') {

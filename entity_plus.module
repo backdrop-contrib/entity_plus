@@ -224,8 +224,8 @@ function entity_plus_type_supports($entity_plus_type, $op) {
   if ($op == 'revision delete') {
     return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));
   }
-  if ($op == 'form') {
-    return (bool) entity_plus_ui_controller($entity_plus_type);
+  if ($op == 'form' && module_exists('entity_ui')) {
+    return (bool) entity_ui_controller($entity_plus_type);
   }
   if ($op != 'access') {
     return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));
@@ -970,6 +970,11 @@ function entity_plus_theme() {
       'render element' => 'elements',
       'template' => 'entity_plus',
       'pattern' => $pattern,
+      'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
+      'file' => 'entity_plus.theme.inc',
+    ),
+    'entity_plus_property' => array(
+      'render element' => 'elements',
       'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
       'file' => 'entity_plus.theme.inc',
     ),

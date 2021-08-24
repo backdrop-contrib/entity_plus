@@ -249,7 +249,7 @@ function entity_plus_entity_info_alter(&$entity_plus_info) {
 
     if (isset($info['controller class']) && in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
       // Automatically disable field cache when entity cache is used.
-      if (!empty($info['entity cache']) && module_exists('entitycache')) {
+      if (!empty($info['entity cache'])) {
         $entity_plus_info[$type]['field cache'] = FALSE;
       }
     }

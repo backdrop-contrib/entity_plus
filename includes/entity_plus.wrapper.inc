@@ -556,7 +556,7 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
 }
 
 /**
- * Provides a wrapper for entities registrered in hook_entity_plus_info().
+ * Provides a wrapper for entities registered in hook_entity_plus_info().
  *
  * The wrapper eases applying getter and setter callbacks of entity properties
  * specified in hook_entity_property_info().

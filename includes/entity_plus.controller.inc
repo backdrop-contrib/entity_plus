@@ -31,8 +31,8 @@ interface EntityPlusControllerInterface extends EntityControllerInterface {
    * Checks if the entity has a certain exportable status.
    *
    * @param $status
-   *   A status constant, i.e. one of ENTITY_CUSTOM, ENTITY_IN_CODE,
-   *   ENTITY_OVERRIDDEN or ENTITY_FIXED.
+   *   A status constant, i.e. one of ENTITY_PLUS_CUSTOM, ENTITY_PLUS_IN_CODE,
+   *   ENTITY_PLUS_OVERRIDDEN or ENTITY_PLUS_FIXED.
    *
    * @return bool
    *   For exportable entities TRUE if the entity has the status, else FALSE.
@@ -668,7 +668,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
       field_attach_prepare_view($this->entityType, array($key => $entity), $view_mode);
       $entity->content += field_attach_view($this->entityType, $entity, $view_mode, $langcode);
     }
-    // Invoke hook_ENTITY_view() to allow modules to add their additions.
+    // Invoke hook_ENTITY_PLUS_view() to allow modules to add their additions.
     if (module_exists('rules')) {
       rules_invoke_all($this->entityType . '_view', $entity, $view_mode, $langcode);
     }
@@ -941,7 +941,7 @@ class EntityPlusControllerExportable extends EntityPlusController {
       parent::delete($ids, $transaction);
 
       foreach ($entities as $id => $entity) {
-        if (entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE)) {
+        if (entity_plus_has_status($this->entityType, $entity, ENTITY_PLUS_IN_CODE)) {
           entity_plus_defaults_rebuild(array($this->entityType));
           break;
         }
@@ -957,10 +957,10 @@ class EntityPlusControllerExportable extends EntityPlusController {
       // To ease figuring out whether this is a revert, make sure that the
       // entity status is updated in case the providing module has been
       // disabled.
-      if (entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE) && !module_exists($entity->{$this->moduleKey})) {
-        $entity->{$this->statusKey} = ENTITY_CUSTOM;
+      if (entity_plus_has_status($this->entityType, $entity, ENTITY_PLUS_IN_CODE) && !module_exists($entity->{$this->moduleKey})) {
+        $entity->{$this->statusKey} = ENTITY_PLUS_CUSTOM;
       }
-      $is_revert = entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE);
+      $is_revert = entity_plus_has_status($this->entityType, $entity, ENTITY_PLUS_IN_CODE);
     }
 
     if (!empty($this->entityInfo['fieldable']) && function_exists($function = 'field_attach_' . $hook)) {
@@ -1000,8 +1000,8 @@ class EntityPlusControllerExportable extends EntityPlusController {
       $entity->original = entity_load_unchanged($this->entityType, $entity->{$this->nameKey});
     }
     // Update the status for entities getting overridden.
-    if (entity_plus_has_status($this->entityType, $entity, ENTITY_IN_CODE) && empty($entity->is_rebuild)) {
-      $entity->{$this->statusKey} |= ENTITY_CUSTOM;
+    if (entity_plus_has_status($this->entityType, $entity, ENTITY_PLUS_IN_CODE) && empty($entity->is_rebuild)) {
+      $entity->{$this->statusKey} |= ENTITY_PLUS_CUSTOM;
     }
     return parent::save($entity, $transaction);
   }

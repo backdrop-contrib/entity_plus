@@ -17,10 +17,10 @@
  * - THEMENAME_entity_plus_property__title()
  * - THEMENAME_entity_plus_property()
  *
- *  Including  
+ *  Including
  *  'extra fields controller class' => 'EntityDefaultExtraFieldsController'
- *  within hook_entity_info for a given custom entity will call this theme to render all its properties.  
- * 
+ *  within hook_entity_info for a given custom entity will call this theme to render all its properties.
+ *
  * @param $variables
  *   An associative array containing:
  *   - label_hidden: A boolean indicating to show or hide the property label.
@@ -31,7 +31,7 @@
  *   - content_attributes_array: An array containing the attributes for the content's
  *     div.
  *   - attributes_array: A string containing the attributes for the top-level wrapping div.
- * 
+ *
  * @ingroup themeable
  */
 function theme_entity_plus_property($variables) {
@@ -189,22 +189,22 @@ function template_preprocess_entity_plus(&$variables) {
 function theme_entity_plus_status($variables) {
   $status = $variables['status'];
   $html = $variables['html'];
-  if (($status & ENTITY_FIXED) == ENTITY_FIXED) {
+  if (($status & ENTITY_PLUS_FIXED) == ENTITY_PLUS_FIXED) {
     $label = t('Fixed');
     $help = t('The configuration is fixed and cannot be changed.');
     return $html ? "<span class='entity-status-fixed' title='$help'>" . $label . "</span>" : $label;
   }
-  elseif (($status & ENTITY_OVERRIDDEN) == ENTITY_OVERRIDDEN) {
+  elseif (($status & ENTITY_PLUS_OVERRIDDEN) == ENTITY_PLUS_OVERRIDDEN) {
     $label = t('Overridden');
     $help = t('This configuration is provided by a module, but has been changed.');
     return $html ? "<span class='entity-status-overridden' title='$help'>" . $label . "</span>" : $label;
   }
-  elseif ($status & ENTITY_IN_CODE) {
+  elseif ($status & ENTITY_PLUS_IN_CODE) {
     $label = t('Default');
     $help = t('A module provides this configuration.');
     return $html ? "<span class='entity-status-default' title='$help'>" . $label . "</span>" : $label;
   }
-  elseif ($status & ENTITY_CUSTOM) {
+  elseif ($status & ENTITY_PLUS_CUSTOM) {
     $label = t('Custom');
     $help = t('A custom configuration by a user.');
     return $html ? "<span class='entity-status-custom' title='$help'>" . $label . "</span>" : $label;

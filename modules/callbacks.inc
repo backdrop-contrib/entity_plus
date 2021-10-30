@@ -651,7 +651,7 @@ function entity_plus_metadata_field_file_validate_item($items, $context) {
  * This function does not implement hook_node_access(), thus it may not be
  * called entity_plus_metadata_node_access().
  *
- * @see entity_plus_access()
+ * @see entity_access()
  *
  * @param $op
  *   The operation being performed. One of 'view', 'update', 'create' or
@@ -753,7 +753,7 @@ function entity_plus_metadata_comment_access($op, $entity = NULL, $account = NUL
   // comment has an associated node, the user must be able to view it in order
   // to access the comment.
   if (isset($entity->nid)) {
-    if (!entity_plus_access('view', 'node', node_load($entity->nid), $account)) {
+    if (!entity_access('view', 'node', node_load($entity->nid), $account)) {
       return FALSE;
     }
   }

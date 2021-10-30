@@ -828,17 +828,17 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
   /**
    * Checks whether the operation $op is allowed on the entity.
    *
-   * @see entity_plus_access()
+   * @see entity_access()
    */
   public function entityAccess($op, $account = NULL) {
     $entity = $this->dataAvailable() ? $this->value() : NULL;
     // The value() method could return FALSE on entities such as user 0, so we
     // need to use NULL instead to conform to the expectations of
-    // entity_plus_access().
+    // entity_access().
     if ($entity === FALSE) {
       $entity = NULL;
     }
-    return entity_plus_access($op, $this->type, $entity, $account);
+    return entity_access($op, $this->type, $entity, $account);
   }
 
   /**

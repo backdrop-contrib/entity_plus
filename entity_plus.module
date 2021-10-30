@@ -275,7 +275,7 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
   // Set access callbacks.
   $entity_plus_info['node']['access callback'] = 'entity_plus_metadata_no_hook_node_access';
   $entity_plus_info['user']['access callback'] = 'entity_plus_metadata_user_access';
-  // File entity has it's own entity_plus_access function.
+  // File entity has it's own entity_access function.
   if (!module_exists('file_entity')) {
     $entity_plus_info['file']['access callback'] = 'entity_plus_metadata_file_access';
   }
@@ -390,7 +390,7 @@ function entity_plus_view($entity_plus_type, $entities, $view_mode = 'full', $la
  *
  * @code
  * $node = entity_create('node', array('type' => 'page'));
- * $access = entity_plus_access('create', 'node', $node, $account);
+ * $access = entity_access('create', 'node', $node, $account);
  * @endcode
  *
  * @param $op
@@ -410,7 +410,7 @@ function entity_plus_view($entity_plus_type, $entities, $view_mode = 'full', $la
  *
  * @see entity_plus_type_supports()
  */
-function entity_plus_access($op, $entity_plus_type, $entity = NULL, $account = NULL) {
+function entity_access($op, $entity_plus_type, $entity = NULL, $account = NULL) {
   if (($info = entity_get_info()) && isset($info[$entity_plus_type]['access callback'])) {
     return $info[$entity_plus_type]['access callback']($op, $entity, $account, $entity_plus_type);
   }

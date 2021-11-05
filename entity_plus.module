@@ -975,3 +975,16 @@ function entity_plus_theme() {
     ),
   );
 }
+/**
+ * Checks whether an entity type is fieldable.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ *
+ * @return
+ *   TRUE if the entity type is fieldable, FALSE otherwise.
+ */
+function entity_plus_type_is_fieldable($entity_type) {
+  $info = entity_get_info($entity_type);
+  return !empty($info['fieldable']);
+}

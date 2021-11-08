@@ -229,7 +229,7 @@ class EntityPlusMetadataTestCase extends EntityPlusHelperTestCase {
     $this->assertFalse($return, "Node has been successfully deleted.");
 
     // Ensure changing the bundle changes available wrapper properties.
-    $wrapper->type->set('article');
+    $wrapper->type->set('post');
     $this->assertTrue(isset($wrapper->field_tags), 'Changing bundle changes available wrapper properties.');
 
     // Test labels.
@@ -364,7 +364,7 @@ class EntityPlusMetadataTestCase extends EntityPlusHelperTestCase {
     }
 
     // Property access of entity references takes entity access into account.
-    $node = $this->backdropCreateNode(array('type' => 'article'));
+    $node = $this->backdropCreateNode(array('type' => 'post'));
     $wrapper = entity_metadata_wrapper('node', $node);
     $unprivileged_user = $this->backdropCreateUser();
     $privileged_user = $this->backdropCreateUser(array('access user profiles'));
@@ -435,7 +435,7 @@ class EntityPlusMetadataTestCase extends EntityPlusHelperTestCase {
           'vocabulary' => $vocab->machine_name,
     ))->save();
     $field_tag_value[LANGUAGE_NONE][0]['tid'] = $tag->getIdentifier();
-    $node = $this->backdropCreateNode(array('type' => 'article', 'field_tags' => $field_tag_value));
+    $node = $this->backdropCreateNode(array('type' => 'post', 'field_tags' => $field_tag_value));
 
     // Try query-ing with a single value.
     $results = entity_plus_property_query('node', 'field_tags', $tag->getIdentifier());

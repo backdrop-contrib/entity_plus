@@ -6,7 +6,7 @@ sources, including:
 
  - The `Entity Metadata Wrapper` module from Drupal 7.
  - Various bits from the `Entity API` module from Drupal 7 which have not (yet)
-   been merged into core. Note that his module renames several functions from
+   been merged into core. Note that this module renames several functions from
    the `entity_xxx()` format to `entity_plus_xxx()` format to prevent conflict
    in case some of these functions are eventually merged into core.
 

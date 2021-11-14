@@ -217,13 +217,13 @@
  */
 
 /**
- * This is a placeholder to illustrate the keys added by Entity Plus
+ * This is a placeholder to illustrate the keys added by Entity Plus.
  */
 function entity_plus_hook_entity_info() {
   $return = array(
     'basic_entity_plus' => array(
       'label' => t('Basic Entity Plus entity'),
-      'plural label' => t('Basic Entity Plus entities'), 
+      'plural label' => t('Basic Entity Plus entities'),
       'entity class' => 'BasicEntityPlus',
       'controller class' => 'BasicEntityPlusController',
       'base table' => 'basic_entity_plus',
@@ -236,15 +236,13 @@ function entity_plus_hook_entity_info() {
       'bundle keys' => array(
         'bundle' => 'type',
       ),
-      'bundles' => array(
-       ),
+      'bundles' => array(),
       'load hook' => 'basic_entity_plus_load',
-      'view modes' => array(
-      ),
+      'view modes' => array(),
 
       'label callback' => 'entity_label',
 
-      // This key is also used by the core entity.tokens.inc to provide a url token
+      // This key is also used by the core entity.tokens.inc to provide a url token.
       'uri callback' => 'basic_entity_plus_uri', 
 
       'module' => 'basic_entity_plus',
@@ -252,7 +250,7 @@ function entity_plus_hook_entity_info() {
     ),
   );
 
-  // Entity to hold bundle definitions
+  // Entity to hold bundle definitions.
   $return['basic_entity_plus_type'] = array(
     'label' => t('Basic Entity Plus type'),
     'entity class' => 'BasicEntityPlus',
@@ -268,7 +266,7 @@ function entity_plus_hook_entity_info() {
       'module' => 'module',
     ),
     'module' => 'basic_entity_plus',
-    // Enable the admin UI. See Entity UI 
+    // Enable the admin UI. See Entity UI.
     'admin ui' => array(
       'path' => 'admin/structure/basic_entity_plus-types',
       'file' => 'basic_entity_plus.admin.inc',
@@ -284,9 +282,9 @@ function entity_plus_hook_entity_info() {
 /**
  * Act on an entity before it is about to be created or updated.
  *
- * @param $entity
+ * @param Entity $entity
  *   The entity object.
- * @param $type
+ * @param string $type
  *   The type of entity being saved (i.e. node, user, comment).
  */
 function hook_entity_plus_presave($entity, $type) {
@@ -296,9 +294,9 @@ function hook_entity_plus_presave($entity, $type) {
 /**
  * Act on entities when inserted.
  *
- * @param $entity
+ * @param Entity $entity
  *   The entity object.
- * @param $type
+ * @param string $type
  *   The type of entity being inserted (i.e. node, user, comment).
  */
 function hook_entity_plus_insert($entity, $type) {
@@ -318,9 +316,9 @@ function hook_entity_plus_insert($entity, $type) {
 /**
  * Act on entities when updated.
  *
- * @param $entity
+ * @param Entity $entity
  *   The entity object.
- * @param $type
+ * @param sting $type
  *   The type of entity being updated (e.g. node, user, comment).
  */
 function hook_entity_plus_update($entity, $type) {
@@ -341,9 +339,9 @@ function hook_entity_plus_update($entity, $type) {
  *
  * This hook runs after the entity type-specific delete hook.
  *
- * @param $entity
+ * @param Entity $entity
  *   The entity object for the entity that has been deleted.
- * @param $type
+ * @param string $type
  *   The type of entity being deleted (i.e. node, user, comment).
  */
 function hook_entity_plus_delete($entity, $type) {
@@ -368,13 +366,13 @@ function hook_entity_plus_delete($entity, $type) {
  * the RSS item generated for this node.
  * For details on how this is used, see node_feed().
  *
- * @param $entity
+ * @param Entity $entity
  *   The entity that is being assembled for rendering.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type of the entity being assembled.
- * @param $view_mode
+ * @param string $view_mode
  *   The $view_mode parameter from entity_view().
- * @param $langcode
+ * @param string $langcode
  *   The language code used for rendering.
  *
  * @see hook_entity_view()

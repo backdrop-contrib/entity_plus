@@ -243,7 +243,7 @@ function entity_plus_hook_entity_info() {
       'label callback' => 'entity_label',
 
       // This key is also used by the core entity.tokens.inc to provide a url token.
-      'uri callback' => 'basic_entity_plus_uri', 
+      'uri callback' => 'basic_entity_plus_uri',
 
       'module' => 'basic_entity_plus',
       'access callback' => 'basic_entity_plus_access',

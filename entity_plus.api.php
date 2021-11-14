@@ -131,37 +131,56 @@
  *   - entity keys: In addition to the sub-keys described above, Entity Plus processes the following
  *     elements:
  *       - name (optional): The key of the entity property containing the unique,
- *       machine readable name of the entity. If specified, this is used as
- *       identifier of the entity, while the usual 'id' key is still required and
- *       may be used when modules deal with entities generically, or to refer to
- *       the entity internally, i.e. in the database. For configuration entities that
- *       define bundles, this is typically 'name' => 'type'. 
- *       If a name key is given, the name is used as entity identifier by the
- *       Entity Plus module, metadata wrappers and entity-type specific hooks.
- *       However note that for consistency all generic entity hooks like
- *       hook_entity_load() are invoked with the entities keyed by numeric id,
- *       while entity-type specific hooks like hook_{entity_type}_load() are
- *       invoked with the entities keyed by name.
- *       Also entity_load() or entity_load_multiple() may be called
- *       with names passed as the $ids parameter, while the results of
- *       entity_load() are always keyed by numeric id. Thus, it is suggested to
- *       make use of entity_load_multiple_by_name() to implement entity-type
- *       specific loading functions like {entity_type}_load_multiple(), as this
- *       function returns the entities keyed by name. 
- *       For exportable entities, it is strongly recommended to make use of a
- *       machine name as names are portable across systems.
- *       This option requires the EntityAPIControllerExportable to work.
+ *         machine readable name of the entity. If specified, this is used as
+ *         identifier of the entity, while the usual 'id' key is still required and
+ *         may be used when modules deal with entities generically, or to refer to
+ *         the entity internally, i.e. in the database. For configuration entities that
+ *         define bundles, this is typically 'name' => 'type'. 
+ *         If a name key is given, the name is used as entity identifier by the
+ *         Entity Plus module, metadata wrappers and entity-type specific hooks.
+ *         However note that for consistency all generic entity hooks like
+ *         hook_entity_load() are invoked with the entities keyed by numeric id,
+ *         while entity-type specific hooks like hook_{entity_type}_load() are
+ *         invoked with the entities keyed by name.
+ *         Also entity_load() or entity_load_multiple() may be called
+ *         with names passed as the $ids parameter, while the results of
+ *         entity_load() are always keyed by numeric id. Thus, it is suggested to
+ *         make use of entity_load_multiple_by_name() to implement entity-type
+ *         specific loading functions like {entity_type}_load_multiple(), as this
+ *         function returns the entities keyed by name. 
+ *         For exportable entities, it is strongly recommended to make use of a
+ *         machine name as names are portable across systems.
+ *         This option requires the EntityAPIControllerExportable to work.
  *       - status (optional): The name of the entity property used by the entity
- *       CRUD API to save the exportable entity status using defined bit flags.
- *       Defaults to 'status'. See entity_plus_has_status().
+ *         CRUD API to save the exportable entity status using defined bit flags.
+ *         Defaults to 'status'. See entity_plus_has_status().
+ *       - language (optional): The name of the property, typically 'language', that contains
+ *         the language code representing the language the entity has been created
+ *         in. This value may be changed when editing the entity and represents
+ *         the language its textual components are supposed to have. If no
+ *         language property is available, the 'language callback' may be used
+ *         instead. This entry can be omitted if the entities of this type are not
+ *         language-aware.
  *       - module: (optional) A key for the module property used by the entity CRUD
- *       API to save the source module name for exportable entities that have been
- *       provided in code. Defaults to 'module'.
+ *         API to save the source module name for exportable entities that have been
+ *         provided in code. Defaults to 'module'.
  *       - default revision: (optional) The name of the entity property used by
- *       the entity CRUD API to determine if a newly-created revision should be
- *       set as the default revision. Defaults to 'default_revision'.
- *       Note that on entity insert the created revision will be always default
- *       regardless of the value of this entity property.
+ *         the entity CRUD API to determine if a newly-created revision should be
+ *         set as the default revision. Defaults to 'default_revision'.
+ *         Note that on entity insert the created revision will be always default
+ *         regardless of the value of this entity property.
+ *    - language callback: (optional) The name of an implementation of
+ *      callback_entity_info_language(). In most situations, when needing to
+ *      determine this value, inspecting a property named after the 'language'
+ *      element of the 'entity keys' should be enough. The language callback is
+ *      meant to be used primarily for temporary alterations of the property
+ *      value: entity-defining modules are encouraged to always define a
+ *      language property, instead of using the callback as main entity language
+ *      source. In fact not having a language property defined is likely to
+ *      prevent an entity from being queried by language. Moreover, given that
+ *      entity_plus_language() is not necessarily used everywhere it would be
+ *      appropriate, modules implementing the language callback should be aware
+ *      that this might not be always called.
  *    - extra fields controller class (optional): The name of the class that is used to return extra field
  *      information, and for creating display information for extra fields. Extra fields are non-Field API
  *      properties of the entity, other than ID or bundle. This class has to implement

@@ -204,6 +204,12 @@ function entity_plus_field_info_alter(&$field_info) {
   if (module_exists('email')) {
     $field_info['email']['property_type'] = 'text';
   }
+  foreach (array('date', 'datetime', 'datestamp') as $date_type) {
+    if (isset($field_info[$date_type])) {
+      $field_info[$date_type]['property_type'] = 'date';
+      $field_info[$date_type]['property_callbacks'][] = 'entity_plus_metadata_field_date_callback';
+    }
+  }
 }
 
 /**

@@ -541,26 +541,27 @@ function entity_plus_metadata_field_verbatim_set($entity, $name, $items, $langco
  *
  * Note that we cannot use field_language() as we are not about to display
  * values, but generally read/write values.
- *
- * @param $fallback
+ * 
+ * @param string $entity_type
+ *   The entity type; e.g., 'node' or 'user'.
+ * @param Entity $entity
+ *   The entity to which the field is attached.
+ * @param array $field
+ *   The field info as returned by field_info_field().
+ * @param string $langcode
+ *   (optional) The language code.
+ * @param boolean $fallback
  *   (optional) Whether to fall back to the entity default language, if no
  *   value is available for the given language code yet.
- *
+ * 
  * @return
  *   The language code to use.
  */
-function entity_plus_metadata_field_get_language($entity_plus_type, $entity, $field, $langcode = LANGUAGE_NONE, $fallback = FALSE) {
-  // Try to figure out the default language used by the entity.
-  // With Backdrop >= 7.15 we can use entity_plus_language().
-  if (function_exists('entity_plus_language')) {
-    $default_langcode = entity_plus_language($entity_plus_type, $entity);
-  }
-  else {
-    $default_langcode = !empty($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
-  }
+function entity_plus_metadata_field_get_language($entity_type, $entity, $field, $langcode = LANGUAGE_NONE, $fallback = FALSE) {
+  $default_langcode = entity_plus_language($entity_type, $entity);
 
   // Determine the right language to use.
-  if ($default_langcode != LANGUAGE_NONE && field_is_translatable($entity_plus_type, $field)) {
+  if ($default_langcode != LANGUAGE_NONE && field_is_translatable($entity_type, $field)) {
     $langcode = ($langcode != LANGUAGE_NONE) ? field_valid_language($langcode, $default_langcode) : $default_langcode;
     if (!isset($entity->{$field['field_name']}[$langcode]) && $fallback) {
       $langcode = $default_langcode;

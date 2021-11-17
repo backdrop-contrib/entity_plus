@@ -987,3 +987,32 @@ function entity_plus_type_is_fieldable($entity_type) {
   $info = entity_get_info($entity_type);
   return !empty($info['fieldable']);
 }
+
+/**
+ * Returns the language of an entity.
+ *
+ * @param string $entity_type
+ *   The entity type; e.g., 'node' or 'user'.
+ * @param Entity $entity
+ *   The entity for which to get the language.
+ *
+ * @return
+ *   A valid language code or NULL if the entity has no language support.
+ */
+function entity_plus_language($entity_type, $entity) {
+  $info = entity_get_info($entity_type);
+
+  // Invoke the callback to get the language. If there is no callback, try to
+  // get it from a property of the entity, otherwise NULL.
+  if (isset($info['language callback']) && function_exists($info['language callback'])) {
+    $langcode = $info['language callback']($entity_type, $entity);
+  }
+  elseif (!empty($info['entity keys']['language']) && isset($entity->{$info['entity keys']['language']})) {
+    $langcode = $entity->{$info['entity keys']['language']};
+  }
+  else {
+    $langcode = LANGUAGE_NONE;
+  }
+
+  return $langcode;
+}

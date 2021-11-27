@@ -176,3 +176,50 @@ function entity_plus_metadata_field_image_callback(&$info, $entity_plus_type, $f
     unset($property['property info']['title']);
   }
 }
+
+/**
+ * Callback to alter the property info of date fields.
+ *
+ * @see entity_plus_metadata_field_entity_property_info()
+ */
+function entity_plus_metadata_field_link_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
+  // Define a data structure so it's possible to deal with both the link title
+  // and URL.
+  $property['getter callback'] = 'entity_plus_metadata_field_verbatim_get';
+  $property['setter callback'] = 'entity_plus_metadata_field_verbatim_set';
+
+  // Auto-create the field item as soon as a property is set.
+  $property['auto creation'] = 'entity_plus_metadata_field_link_create_item';
+
+  $property['property info'] = array(
+    'title' => array(
+      'type' => 'text',
+      'label' => t('The title of the link.'),
+      'setter callback' => 'entity_plus_property_verbatim_set',
+      'required' => $instance['required'] && ($instance['settings']['title'] == 'required'),
+    ),
+    'url' => array(
+      'type' => 'text',
+      'label' => t('The URL of the link.'),
+      'setter callback' => 'entity_plus_property_verbatim_set',
+      'getter callback' => 'entity_plus_link_url_property_get',
+      'required' => $instance['required'] && !$instance['settings']['url'],
+    ),
+    'attributes' => array(
+      'type' => 'struct',
+      'label' => t('The attributes of the link.'),
+      'setter callback' => 'entity_plus_property_verbatim_set',
+      'getter callback' => 'entity_plus_link_attribute_property_get',
+    ),
+    'display_url' => array(
+      'type' => 'uri',
+      'label' => t('The full URL of the link.'),
+      'setter callback' => 'entity_plus_property_verbatim_set',
+    ),
+  );
+  if ($instance['settings']['title'] == 'none') {
+    unset($property['property info']['title']);
+  }
+  unset($property['query callback']);
+}

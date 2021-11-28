@@ -1010,6 +1010,10 @@ function entity_plus_language($entity_type, $entity) {
   elseif (!empty($info['entity keys']['language']) && isset($entity->{$info['entity keys']['language']})) {
     $langcode = $entity->{$info['entity keys']['language']};
   }
+  elseif (isset($entity->langcode)) {
+    // Backdrop added the property langcode as default for core entities.
+    $langcode = $entity->langcode;
+  }
   else {
     $langcode = LANGUAGE_NONE;
   }

@@ -1041,7 +1041,7 @@ function entity_plus_metadata_table_query($entity_plus_type, $property, $value, 
   $info = $properties[$property] + array('schema field' => $property);
 
   $query = new EntityFieldQuery();
-  $query->entityCondition('entity_plus_type', $entity_plus_type, '=')
+  $query->entityCondition('entity_type', $entity_plus_type, '=')
         ->propertyCondition($info['schema field'], $value, is_array($value) ? 'IN' : '=')
         ->range(0, $limit);
 
@@ -1059,7 +1059,7 @@ function entity_plus_metadata_field_query($entity_plus_type, $property, $value, 
   $field = field_info_field($property);
   $columns = array_keys($field['columns']);
 
-  $query->entityCondition('entity_plus_type', $entity_plus_type, '=')
+  $query->entityCondition('entity_type', $entity_plus_type, '=')
         ->fieldCondition($field, $columns[0], $value, is_array($value) ? 'IN' : '=')
         ->range(0, $limit);
 

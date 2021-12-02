@@ -227,9 +227,10 @@ function entity_plus_metadata_statistics_properties_access($op, $property, $enti
  * @see entity_plus_metadata_system_entity_plus_info_alter()
  */
 function entity_plus_metadata_system_get_properties($data = FALSE, array $options, $name) {
+  $system_core_config = config_get('system.core');
   switch ($name) {
     case 'name':
-      return variable_get('site_name', 'Backdrop');
+      return !empty($system_core_config['site_name']) ? $system_core_config['site_name'] : 'Backdrop';
 
     case 'url':
       return url('<front>', $options);
@@ -248,7 +249,7 @@ function entity_plus_metadata_system_get_properties($data = FALSE, array $option
       return array();
 
     default:
-      return variable_get('site_' . $name, '');
+      return !empty($system_core_config['site_' . $name]) ? $system_core_config['site_' . $name] : '';
   }
 }
 
@@ -359,8 +360,8 @@ function entity_plus_metadata_user_get_properties($account, array $options, $nam
       return empty($account->login) ? NULL : $account->login;
 
     case 'name':
-      return empty($account->uid) ? variable_get('anonymous', t('Anonymous')) : $account->name;
-
+      return empty($account->uid) ? (!empty(config_get('system.core', 'anonymous')) ? config_get('system.core', 'anonymous')  : t('Anonymous')) : $account->name;
+  
     case 'url':
       if (empty($account->uid)) {
         return NULL;
@@ -375,7 +376,7 @@ function entity_plus_metadata_user_get_properties($account, array $options, $nam
       return isset($account->roles) ? $account->roles : array();
 
     case 'theme':
-      return empty($account->theme) ? variable_get('theme_default', 'bartik') : $account->theme;
+      return empty($account->theme) ? (!empty(config_get('system.core', 'system_default')) ? config_get('system.core', 'system_default')  : 'basis') : $account->theme;
   }
 }
 
@@ -881,12 +882,12 @@ function entity_plus_metadata_create_node($values = array()) {
     'is_new' => TRUE,
   );
   // Set some defaults.
-  $node_options = variable_get('node_options_' . $node->type, array('status', 'promote'));
+  $node_options_settings = config_get('node.type.' . $node->type, 'settings');
   foreach (array('status', 'promote', 'sticky') as $key) {
-    $node->$key = (int) in_array($key, $node_options);
+    $node->$key = (int) $node_options_settings[$key. '_default'];
   }
   if (module_exists('comment') && !isset($node->comment)) {
-    $node->comment = variable_get("comment_$node->type", COMMENT_NODE_OPEN);
+    $node->comment = !empty($node_options_settings['comment_default']) ? $node_options_settings['comment_default'] : COMMENT_NODE_OPEN;
   }
   // Apply the given values.
   foreach ($values as $key => $value) {

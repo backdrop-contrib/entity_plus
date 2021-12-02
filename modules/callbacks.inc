@@ -581,7 +581,7 @@ function entity_plus_metadata_field_text_get($item, array $options, $name, $type
   // $name is either 'value' or 'summary'.
   if (!isset($item['safe_' . $name])) {
     // Apply input formats.
-    $langcode = isset($options['language']) ? $options['language']->langcode : '';
+    $langcode = isset($options['language']) ? $options['language']->langcode : LANGUAGE_NONE;
     $format = isset($item['format']) ? $item['format'] : filter_default_format();
     $item['safe_' . $name] = check_markup($item[$name], $format, $langcode);
     // To speed up subsequent calls, update $item with the 'safe_value'.
@@ -863,7 +863,7 @@ function entity_plus_metadata_create_comment($values = array()) {
     'pid' => 0,
     'subject' => '',
     'uid' => 0,
-    'language' => LANGUAGE_NONE,
+    'langcode' => LANGUAGE_NONE,
     'node_type' => NULL,
     'is_new' => TRUE,
   ));
@@ -877,7 +877,7 @@ function entity_plus_metadata_create_comment($values = array()) {
 function entity_plus_metadata_create_node($values = array()) {
   $node = (object) array(
     'type' => $values['type'],
-    'language' => LANGUAGE_NONE,
+    'langcode' => LANGUAGE_NONE,
     'is_new' => TRUE,
   );
   // Set some defaults.

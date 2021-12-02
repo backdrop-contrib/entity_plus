@@ -1,5 +1,5 @@
 [EntityPlusMetadataTestCase]
-name = Entity Plus functionality
-description = Tests Entity Plus.
+name = Entity Plus
+description = Tests for Entity Plus functionality.
 group = Entity Plus
 file = entity_plus.test

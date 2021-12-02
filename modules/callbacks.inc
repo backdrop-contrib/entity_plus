@@ -372,7 +372,7 @@ function entity_plus_metadata_user_get_properties($account, array $options, $nam
       return empty($account->uid) ? NULL : url("user/$account->uid/edit", $options);
 
     case 'roles':
-      return isset($account->roles) ? array_keys($account->roles) : array();
+      return isset($account->roles) ? $account->roles : array();
 
     case 'theme':
       return empty($account->theme) ? variable_get('theme_default', 'bartik') : $account->theme;

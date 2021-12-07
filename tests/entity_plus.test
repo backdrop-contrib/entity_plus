@@ -181,7 +181,7 @@ class EntityPlusMetadataTestCase extends EntityPlusHelperTestCase {
     language_save($language);
 
     $body['en'][0] = array('value' => '<b>English body.</b>', 'summary' => '<b>The body.</b>');
-    $node = $this->backdropCreateNode(array('body' => $body, 'language' => 'en', 'type' => 'page'));
+    $node = $this->backdropCreateNode(array('body' => $body, 'langcode' => 'en', 'type' => 'page'));
     $wrapper = entity_metadata_wrapper('node', $node);
 
     $wrapper->language('de');

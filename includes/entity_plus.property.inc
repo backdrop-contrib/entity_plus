@@ -204,6 +204,10 @@ function entity_plus_field_info_alter(&$field_info) {
   if (module_exists('email')) {
     $field_info['email']['property_type'] = 'text';
   }
+  if (module_exists('link')) {
+    $field_info['link_field']['property_type'] = 'field_item_link';
+    $field_info['link_field']['property_callbacks'][] = 'entity_plus_metadata_field_link_callback';
+  }
 }
 
 /**

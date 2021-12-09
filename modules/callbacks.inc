@@ -1083,3 +1083,29 @@ function entity_plus_metadata_uri_file($file) {
     'path' => file_create_url($file->uri),
   );
 }
+
+/**
+ * Callback for creating a new, empty link field item.
+ *
+ * @see entity_plus_metadata_field_link_callback()
+ */
+function entity_plus_metadata_field_link_create_item() {
+  return array('title' => NULL, 'url' => NULL, 'display_url' => NULL);
+}
+
+
+/**
+ * Callback for getting the link URL property.
+ */
+function entity_plus_link_url_property_get($data, array $options, $name, $type, $info) {
+  $url = entity_plus_property_verbatim_get($data, $options, $name, $type, $info);
+
+  return url($url, $data + $options);
+}
+
+/**
+ * Entity property info getter callback for link attributes.
+ */
+function entity_plus_link_attribute_property_get($data, array $options, $name, $type, $info) {
+  return isset($data[$name]) ? array_filter($data[$name]) : array();
+}

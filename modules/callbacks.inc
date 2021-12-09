@@ -304,15 +304,28 @@ function entity_plus_metadata_taxonomy_term_get_properties($term, array $options
       if (isset($term->parent[0]) && !is_array(isset($term->parent[0]))) {
         return $term->parent;
       }
-      return array_keys(taxonomy_get_parents($term->tid));
+      return array_keys(taxonomy_term_load_parents($term->tid));
 
     case 'parents_all':
       // We have to return an array of ids.
       $tids = array();
-      foreach (taxonomy_get_parents_all($term->tid) as $parent) {
+      foreach (taxonomy_term_load_parents_all($term->tid) as $parent) {
         $tids[] = $parent->tid;
       }
       return $tids;
+      
+    case 'vocabulary':
+      return taxonomy_vocabulary_load($term->vocabulary);
+  }
+}
+
+/** 
+ * Callback for getting raw term properties
+ */
+function entity_plus_metadata_taxonomy_term_get_raw_properties($term, array $options, $name) {
+  switch ($name) {
+    case 'vocabulary':
+      return $term->vocabulary;
   }
 }
 
@@ -324,11 +337,8 @@ function entity_plus_metadata_taxonomy_term_get_properties($term, array $options
 function entity_plus_metadata_taxonomy_term_setter($term, $name, $value) {
   switch ($name) {
     case 'vocabulary':
-      // Make sure to update the taxonomy bundle key, so load the vocabulary.
-      // Support both, loading by name or ID.
-      $vocabulary = is_numeric($value) ? taxonomy_vocabulary_load($value) : taxonomy_vocabulary_machine_name_load($value);
-      $term->vocabulary_machine_name = $vocabulary->machine_name;
-      return $term->vid = $vocabulary->vid;
+      $term->vocabulary = $value->machine_name;
+      return $term->vocabulary;
     case 'parent':
       return $term->parent = $value;
   }
@@ -341,8 +351,8 @@ function entity_plus_metadata_taxonomy_term_setter($term, $name, $value) {
 function entity_plus_metadata_taxonomy_vocabulary_get_properties($vocabulary, array $options, $name) {
   switch ($name) {
     case 'term_count':
-      $sql = "SELECT COUNT (1) FROM {taxonomy_term_data} td WHERE td.vid = :vid";
-      return db_query($sql, array(':vid' => $vocabulary->vid))->fetchField();
+      $sql = "SELECT COUNT (1) FROM {taxonomy_term_data} td WHERE td.vocabulary = :vocabulary";
+      return db_query($sql, array(':vocabulary' => $vocabulary->machine_name))->fetchField();
   }
 }
 
@@ -798,9 +808,6 @@ function entity_plus_metadata_comment_properties_access($op, $property, $entity 
  * Access callback for the taxonomy entities.
  */
 function entity_plus_metadata_taxonomy_access($op, $entity = NULL, $account = NULL, $entity_plus_type = NULL) {
-  if ($entity_plus_type == 'taxonomy_vocabulary') {
-    return user_access('administer taxonomy', $account);
-  }
   if (isset($entity) && $op == 'update' && !isset($account) && user_access("edit terms in {$entity->vocabulary}")) {
     return TRUE;
   }

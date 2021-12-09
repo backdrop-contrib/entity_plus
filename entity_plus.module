@@ -316,16 +316,6 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
     $entity_plus_info['taxonomy_term']['view callback'] = 'entity_plus_metadata_view_single';
     $entity_plus_info['taxonomy_term']['form callback'] = 'entity_plus_metadata_form_taxonomy_term';
 
-    if (isset($entity_plus_info['taxonomy_vocabulary'])) {
-      $entity_plus_info['taxonomy_vocabulary']['plural label'] = t('Taxonomy vocabularies');
-      $entity_plus_info['taxonomy_vocabulary']['description'] = t('Vocabularies contain related taxonomy terms, which are used for classifying content.');
-      $entity_plus_info['taxonomy_vocabulary']['access callback'] = 'entity_plus_metadata_taxonomy_access';
-      $entity_plus_info['taxonomy_vocabulary']['creation callback'] = 'entity_plus_metadata_create_object';
-      $entity_plus_info['taxonomy_vocabulary']['save callback'] = 'taxonomy_vocabulary_save';
-      $entity_plus_info['taxonomy_vocabulary']['deletion callback'] = 'taxonomy_vocabulary_delete';
-      $entity_plus_info['taxonomy_vocabulary']['form callback'] = 'entity_plus_metadata_form_taxonomy_vocabulary';
-      $entity_plus_info['taxonomy_vocabulary']['token type'] = 'vocabulary';
-    }
     // Token type mapping.
     $entity_plus_info['taxonomy_term']['token type'] = 'term';
   }

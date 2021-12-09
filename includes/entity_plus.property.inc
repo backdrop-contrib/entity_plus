@@ -210,6 +210,10 @@ function entity_plus_field_info_alter(&$field_info) {
       $field_info[$date_type]['property_callbacks'][] = 'entity_plus_metadata_field_date_callback';
     }
   }
+  if (module_exists('link')) {
+    $field_info['link_field']['property_type'] = 'field_item_link';
+    $field_info['link_field']['property_callbacks'][] = 'entity_plus_metadata_field_link_callback';
+  }
 }
 
 /**

@@ -316,16 +316,6 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
     $entity_plus_info['taxonomy_term']['view callback'] = 'entity_plus_metadata_view_single';
     $entity_plus_info['taxonomy_term']['form callback'] = 'entity_plus_metadata_form_taxonomy_term';
 
-    if (isset($entity_plus_info['taxonomy_vocabulary'])) {
-      $entity_plus_info['taxonomy_vocabulary']['plural label'] = t('Taxonomy vocabularies');
-      $entity_plus_info['taxonomy_vocabulary']['description'] = t('Vocabularies contain related taxonomy terms, which are used for classifying content.');
-      $entity_plus_info['taxonomy_vocabulary']['access callback'] = 'entity_plus_metadata_taxonomy_access';
-      $entity_plus_info['taxonomy_vocabulary']['creation callback'] = 'entity_plus_metadata_create_object';
-      $entity_plus_info['taxonomy_vocabulary']['save callback'] = 'taxonomy_vocabulary_save';
-      $entity_plus_info['taxonomy_vocabulary']['deletion callback'] = 'taxonomy_vocabulary_delete';
-      $entity_plus_info['taxonomy_vocabulary']['form callback'] = 'entity_plus_metadata_form_taxonomy_vocabulary';
-      $entity_plus_info['taxonomy_vocabulary']['token type'] = 'vocabulary';
-    }
     // Token type mapping.
     $entity_plus_info['taxonomy_term']['token type'] = 'term';
   }
@@ -986,4 +976,37 @@ function entity_plus_theme() {
 function entity_plus_type_is_fieldable($entity_type) {
   $info = entity_get_info($entity_type);
   return !empty($info['fieldable']);
+}
+
+/**
+ * Returns the language of an entity.
+ *
+ * @param string $entity_type
+ *   The entity type; e.g., 'node' or 'user'.
+ * @param Entity $entity
+ *   The entity for which to get the language.
+ *
+ * @return
+ *   A valid language code or NULL if the entity has no language support.
+ */
+function entity_plus_language($entity_type, $entity) {
+  $info = entity_get_info($entity_type);
+
+  // Invoke the callback to get the language. If there is no callback, try to
+  // get it from a property of the entity, otherwise NULL.
+  if (isset($info['language callback']) && function_exists($info['language callback'])) {
+    $langcode = $info['language callback']($entity_type, $entity);
+  }
+  elseif (!empty($info['entity keys']['language']) && isset($entity->{$info['entity keys']['language']})) {
+    $langcode = $entity->{$info['entity keys']['language']};
+  }
+  elseif (isset($entity->langcode)) {
+    // Backdrop added the property langcode as default for core entities.
+    $langcode = $entity->langcode;
+  }
+  else {
+    $langcode = LANGUAGE_NONE;
+  }
+
+  return $langcode;
 }

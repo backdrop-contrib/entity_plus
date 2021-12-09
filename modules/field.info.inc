@@ -179,7 +179,72 @@ function entity_plus_metadata_field_image_callback(&$info, $entity_plus_type, $f
 
 /**
  * Callback to alter the property info of date fields.
- *
+ * @see entity_plus_metadata_field_entity_property_info().
+ */
+function entity_plus_metadata_field_date_callback(&$info, $entity_type, $field, $instance, $field_type) {
+  $name = $field['field_name'];
+  $property = &$info[$entity_type]['bundles'][$instance['bundle']]['properties'][$name];
+
+  if ($field['type'] != 'datestamp' || $field['settings']['timezone_db'] != 'UTC') {
+    // Add a getter callback to convert the date into the right format.
+    $property['getter callback'] = 'entity_plus_metadata_field_date_getter';
+    $property['setter callback'] = 'entity_plus_metadata_field_date_setter';
+    unset($property['query callback']);
+  }
+  if (!empty($field['settings']['todate'])) {
+    // Define a simple data structure containing both dates.
+    $property['type'] = ($field['cardinality'] != 1) ? 'list<struct>' : 'struct';
+    $property['auto creation'] = 'entity_plus_metadata_date_struct_create';
+    $property['getter callback'] = 'entity_plus_metadata_field_verbatim_get';
+    $property['setter callback'] = 'entity_plus_metadata_field_verbatim_set';
+    $property['property info'] = array(
+      'value' => array(
+        'type' => 'date',
+        'label' => t('Start date'),
+        'getter callback' => 'entity_plus_metadata_date_struct_getter',
+        'setter callback' => 'entity_plus_metadata_date_struct_setter',
+        // The getter and setter callbacks for 'value' and 'value2'
+        // will not provide the field name as $name, we'll add it to $info.
+        'field_name' => $field['field_name'],
+        // Alert Microdata module that this value can be exposed in microdata.
+        'microdata' => TRUE,
+      ),
+      'value2' => array(
+        'type' => 'date',
+        'label' => t('End date'),
+        'getter callback' => 'entity_plus_metadata_date_struct_getter',
+        'setter callback' => 'entity_plus_metadata_date_struct_setter',
+        // The getter and setter callbacks for 'value' and 'value2'
+        // will not provide the field name as $name, we'll add it to $info.
+        'field_name' => $field['field_name'],
+        // Alert Microdata module that this value can be exposed in microdata.
+        // While microdata has not been ported to Backdrop, leave this here just in case 
+        'microdata' => TRUE,
+      ),
+      'duration' => array(
+        'type' => 'duration',
+        'label' => t('Duration'),
+        'desription' => t('The duration of the time period given by the dates.'),
+        'getter callback' => 'entity_plus_metadata_date_duration_getter',
+        // No setter callback for duration.
+        // The getter callback for duration will not provide the field name
+        // as $name, we'll add it to $info.
+        'field_name' => $field['field_name'],
+      ),
+    );
+    unset($property['query callback']);
+  }
+  else {
+    // If this doesn't have a todate, it is handled as a date rather than a
+    // struct. Enable microdata on the field itself rather than the properties.
+    // While microdata has not been ported to Backdrop, leave this here just in case 
+    $property['microdata'] = TRUE;
+  }
+}
+  
+/**
+ * Callback to alter the property info of link fields.
+ * 
  * @see entity_plus_metadata_field_entity_property_info()
  */
 function entity_plus_metadata_field_link_callback(&$info, $entity_type, $field, $instance, $field_type) {
@@ -223,3 +288,4 @@ function entity_plus_metadata_field_link_callback(&$info, $entity_type, $field, 
   }
   unset($property['query callback']);
 }
+

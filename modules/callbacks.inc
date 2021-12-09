@@ -1085,7 +1085,106 @@ function entity_plus_metadata_uri_file($file) {
 }
 
 /**
- * Callback for creating a new, empty link field item.
+ * Getter callback to return date values as datestamp in UTC from the field.
+ */
+function entity_plus_metadata_field_date_getter($entity, array $options, $name, $entity_type, &$context) {
+  $return = entity_plus_metadata_field_verbatim_get($entity, $options, $name, $entity_type, $context);
+  $items = ($context['field']['cardinality'] == 1) ? array($return) : $return;
+  foreach ($items as $key => $item) {
+    $items[$key] = entity_plus_metadata_date_struct_getter($item, $options, 'value', 'struct', $context);
+  }
+  return ($context['field']['cardinality'] == 1) ? $items[0] : $items;
+}
+
+/**
+ * Getter callback to return date values as datestamp in UTC.
+ */
+function entity_plus_metadata_date_struct_getter($item, array $options, $name, $type, $info) {
+  $value = trim($item[$name]);
+  if (empty($value)) {
+    return NULL;
+  }
+
+  $timezone_db = !empty($item['timezone_db']) ? $item['timezone_db'] : 'UTC';
+  $date = new BackdropDateTime($value, $timezone_db);
+  return !empty($date) ? date_format_date($date, 'custom', 'U') : NULL;
+}
+
+/**
+ * Getter callback to return the duration of the time period given by the dates.
+ */
+function entity_plus_metadata_date_duration_getter($item, array $options, $name, $type, $info) {
+  $value = entity_plus_metadata_date_struct_getter($item, $options, 'value', 'struct', $info);
+  $value2 = entity_plus_metadata_date_struct_getter($item, $options, 'value2', 'struct', $info);
+  if ($value && $value2) {
+    return $value2 - $value;
+  }
+}
+
+/**
+ * Callback for setting field property values.
+ *
+ * Based on entity_metadata_field_property_set(), the original property setter,
+ * adapted to transform non-timestamp date values to timestamps.
+ */
+function entity_plus_metadata_field_date_setter(&$entity, $name, $value, $langcode, $entity_type, $info) {
+  $field = field_info_field($name);
+  if (!isset($langcode)) {
+    // Try to figure out the default language used by the entity.
+    // @todo: Update once http://backdrop.org/node/1260640 has been fixed.
+    $langcode = isset($entity->language) ? $entity->language : LANGUAGE_NONE;
+  }
+  $values = $field['cardinality'] == 1 ? array($value) : (array) $value;
+
+  $items = array();
+  foreach ($values as $delta => $value) {
+    // Make use of the struct setter to convert the date back to a timestamp.
+    $info['field_name'] = $name;
+    entity_plus_metadata_date_struct_setter($items[$delta], 'value', $value, $langcode, 'struct', $info);
+  }
+  $entity->{$name}[$langcode] = $items;
+  // Empty the static field language cache, so the field system picks up any
+  // possible new languages.
+  backdrop_static_reset('field_language');
+}
+
+/**
+ * Auto creation callback for fields which contain two date values in one.
+ */
+function entity_plus_metadata_date_struct_create($name, $property_info) {
+  return array(
+    'date_type' => $property_info['field']['columns'][$name]['type'],
+    'timezone_db' => $property_info['field']['settings']['timezone_db'],
+  );
+}
+
+/**
+ * Callback for setting an individual field value if a to-date may be there too.
+ *
+ * Based on entity_property_verbatim_set().
+ *
+ * The passed in unix timestamp (UTC) is converted to the right value and format dependent on the field.
+ *
+ * $name is either 'value' or 'value2'.
+ */
+function entity_plus_metadata_date_struct_setter(&$item, $name, $value, $langcode, $type, $info) {
+  if (!isset($value)) {
+    $item[$name] = NULL;
+  }
+  else {
+    $field = field_info_field($info['field_name']);
+    $format = date_type_format($field['type']);
+    $timezone_db = date_get_timezone_db($field['settings']['tz_handling']);
+
+    $date = new BackdropDateTime($value, 'UTC');
+    if ($timezone_db != 'UTC') {
+      date_timezone_set($date, timezone_open($timezone_db));
+    }
+    $item[$name] = $date->format($format);
+  }
+}
+
+/** Callback for creating a new, empty link field item.
  *
  * @see entity_plus_metadata_field_link_callback()
  */

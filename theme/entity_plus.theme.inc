@@ -21,7 +21,7 @@
  *  'extra fields controller class' => 'EntityDefaultExtraFieldsController'
  *  within hook_entity_info for a given custom entity will call this theme to render all its properties.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - label_hidden: A boolean indicating to show or hide the property label.
  *   - label: The label for the property
@@ -48,7 +48,7 @@ function theme_entity_plus_property($variables) {
 
   // Render the content.
   $content_suffix = '';
-  if (!$variables['label_hidden'] || $content_attributes ) {
+  if (!$variables['label_hidden'] || $content_attributes) {
     $output .= '<div' . $content_attributes . '>';
     $content_suffix = '</div>';
   }
@@ -108,6 +108,7 @@ function template_preprocess_entity_plus_property(&$variables, $hook) {
  * Renders a property using simple defaults based upon the property type.
  *
  * @return string
+ *    The rendered property value.
  */
 function entity_plus_property_default_render_value_by_type(EntityMetadataWrapper $property) {
   // If there is an options list or entity label, render that by default.
@@ -122,6 +123,7 @@ function entity_plus_property_default_render_value_by_type(EntityMetadataWrapper
   switch ($property->type()) {
     case 'boolean':
       return $property->value() ? t('yes') : t('no');
+
     default:
       return check_plain($property->value());
   }
@@ -170,7 +172,7 @@ function template_preprocess_entity_plus(&$variables) {
 
   // Add RDF type and about URI.
   if (module_exists('rdf')) {
-    $variables['attributes_array']['about'] = empty($uri['path']) ? NULL: url($uri['path']);
+    $variables['attributes_array']['about'] = empty($uri['path']) ? NULL : url($uri['path']);
     $variables['attributes_array']['typeof'] = empty($entity->rdf_mapping['rdftype']) ? NULL : $entity->rdf_mapping['rdftype'];
   }
 

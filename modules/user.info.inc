@@ -107,4 +107,3 @@ function entity_plus_metadata_user_entity_property_info() {
   );
   return $info;
 }
-

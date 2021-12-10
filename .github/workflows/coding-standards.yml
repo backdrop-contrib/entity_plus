@@ -31,5 +31,5 @@ jobs:
         run: >
           vendor/bin/phpcs -n
           --standard=vendor/backdrop/coder/coder_sniffer/Backdrop
-          --ignore="vendor/*"
+          --ignore="vendor/*,views/handlers/*,views/plugins/*,views/entity_plus_views_example_query.php"
           --extensions=install,module,php,inc .

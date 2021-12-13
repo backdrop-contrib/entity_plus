@@ -6,41 +6,35 @@
 
  /**
   * Define status codes used for exportable entities.
-  *
-  * Temporarily (?) wrapped in a check to see if they are already defined
-  * since Entity UI declares the same.
-  * See: https://github.com/backdrop-contrib/entity_plus/issues/20
   */
 
-if (!defined('ENTITY_CUSTOM') && !module_exists('entity_ui')) {
-  /**
-  * A bit flag used to let us know if an entity is in the database.
-  */
-  define('ENTITY_CUSTOM', 0x01);
+/**
+* A bit flag used to let us know if an entity is in the database.
+*/
+define('ENTITY_PLUS_CUSTOM', 0x01);
 
-  /**
-  * Deprecated, but still here for backward compatibility.
-  */
-  define('ENTITY_IN_DB', 0x01);
+/**
+* Deprecated, but still here for backward compatibility.
+*/
+define('ENTITY_PLUS_IN_DB', 0x01);
 
-  /**
-  * A bit flag used to let us know if an entity is a 'default' in code.
-  */
-  define('ENTITY_IN_CODE', 0x02);
+/**
+* A bit flag used to let us know if an entity is a 'default' in code.
+*/
+define('ENTITY_PLUS_IN_CODE', 0x02);
 
-  /**
-  * A bit flag used to mark entities as overridden, e.g. they were originally
-  * definded in code and are saved now in the database. Same as
-  * (ENTITY_CUSTOM | ENTITY_IN_CODE).
-  */
-  define('ENTITY_OVERRIDDEN', 0x03);
+/**
+* A bit flag used to mark entities as overridden, e.g. they were originally
+* definded in code and are saved now in the database. Same as
+* (ENTITY_PLUS_CUSTOM | ENTITY_PLUS_IN_CODE).
+*/
+define('ENTITY_PLUS_OVERRIDDEN', 0x03);
 
-  /**
-  * A bit flag used to mark entities as fixed, thus not changeable for any
-  * user.
-  */
-  define('ENTITY_FIXED', 0x04 | 0x02);
-}
+/**
+* A bit flag used to mark entities as fixed, thus not changeable for any
+* user.
+*/
+define('ENTITY_PLUS_FIXED', 0x04 | 0x02);
 
 module_load_include('inc', 'entity_plus', 'modules/callbacks');
 module_load_include('inc', 'entity_plus', 'includes/entity_plus.property');
@@ -97,11 +91,9 @@ function entity_plus_autoload_info() {
     'EntityPlusControllerRevisionableInterface' => 'includes/entity_plus.controller.inc',
     'EntityPlusController' => 'includes/entity_plus.controller.inc',
     'EntityPlusControllerExportable' => 'includes/entity_plus.controller.inc',
-    'EntityPlusControllerInterface' => 'includes/entity_plus.controller.inc',
-    'EntityPlusControllerInterface' => 'includes/entity_plus.controller.inc',
     'EntityPlusFieldHandlerHelper' => 'views/handlers/entity_plus_views_field_handler_helper.inc',
     'entity_plus_views_handler_area_entity' => 'views/handlers/entity_plus_views_handler_area_entity.inc',
-    'entity_plus_views_handler_field_boolean' => 'views/handlers/entity_plus_views_handler_field_boolian.inc',
+    'entity_plus_views_handler_field_boolean' => 'views/handlers/entity_plus_views_handler_field_boolean.inc',
     'entity_plus_views_handler_field_date' => 'views/handlers/entity_plus_views_handler_field_date.inc',
     'entity_plus_views_handler_field_duration' => 'views/handlers/entity_plus_views_handler_field_duration.inc',
     'entity_plus_views_handler_field_entity' => 'views/handlers/entity_plus_views_handler_field_entity.inc',
@@ -226,8 +218,8 @@ function entity_plus_type_supports($entity_type, $op) {
   if ($op == 'revision delete') {
     return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));
   }
-  if ($op == 'form') {
-    return (bool) entity_plus_ui_controller($entity_type);
+  if ($op == 'form' && module_exists('entity_ui')) {
+    return (bool) entity_ui_controller($entity_plus_type);
   }
   if ($op != 'access') {
     return in_array('EntityPlusControllerInterface', class_implements($info['controller class']));
@@ -251,7 +243,7 @@ function entity_plus_entity_info_alter(&$entity_plus_info) {
 
     if (isset($info['controller class']) && in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
       // Automatically disable field cache when entity cache is used.
-      if (!empty($info['entity cache']) && module_exists('entitycache')) {
+      if (!empty($info['entity cache'])) {
         $entity_plus_info[$type]['field cache'] = FALSE;
       }
     }
@@ -324,16 +316,6 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
     $entity_plus_info['taxonomy_term']['view callback'] = 'entity_plus_metadata_view_single';
     $entity_plus_info['taxonomy_term']['form callback'] = 'entity_plus_metadata_form_taxonomy_term';
 
-    if (isset($entity_plus_info['taxonomy_vocabulary'])) {
-      $entity_plus_info['taxonomy_vocabulary']['plural label'] = t('Taxonomy vocabularies');
-      $entity_plus_info['taxonomy_vocabulary']['description'] = t('Vocabularies contain related taxonomy terms, which are used for classifying content.');
-      $entity_plus_info['taxonomy_vocabulary']['access callback'] = 'entity_plus_metadata_taxonomy_access';
-      $entity_plus_info['taxonomy_vocabulary']['creation callback'] = 'entity_plus_metadata_create_object';
-      $entity_plus_info['taxonomy_vocabulary']['save callback'] = 'taxonomy_vocabulary_save';
-      $entity_plus_info['taxonomy_vocabulary']['deletion callback'] = 'taxonomy_vocabulary_delete';
-      $entity_plus_info['taxonomy_vocabulary']['form callback'] = 'entity_plus_metadata_form_taxonomy_vocabulary';
-      $entity_plus_info['taxonomy_vocabulary']['token type'] = 'vocabulary';
-    }
     // Token type mapping.
     $entity_plus_info['taxonomy_term']['token type'] = 'term';
   }
@@ -679,8 +661,8 @@ function entity_plus_revision_set_default($entity_type, $entity) {
  * @param $entity
  *   The entity to check the status on.
  * @param $status
- *   The constant status like ENTITY_CUSTOM, ENTITY_IN_CODE, ENTITY_OVERRIDDEN
- *   or ENTITY_FIXED.
+ *   The constant status like ENTITY_PLUS_CUSTOM, ENTITY_PLUS_IN_CODE, ENTITY_PLUS_OVERRIDDEN
+ *   or ENTITY_PLUS_FIXED.
  *
  * @return
  *   TRUE if the entity has the status, FALSE otherwise.
@@ -824,13 +806,13 @@ function _entity_plus_defaults_rebuild($entity_type) {
     backdrop_alter($hook, $entities);
 
     // Check for defaults that disappeared.
-    $existing_defaults = entity_load_multiple_by_name($entity_type, FALSE, array($keys['status'] => array(ENTITY_OVERRIDDEN, ENTITY_IN_CODE, ENTITY_FIXED)));
+    $existing_defaults = entity_load_multiple_by_name($entity_type, FALSE, array($keys['status'] => array(ENTITY_PLUS_OVERRIDDEN, ENTITY_PLUS_IN_CODE, ENTITY_PLUS_FIXED)));
 
     foreach ($existing_defaults as $name => $entity) {
       if (empty($entities[$name])) {
         $entity->is_rebuild = TRUE;
-        if (entity_plus_has_status($entity_type, $entity, ENTITY_OVERRIDDEN)) {
-          $entity->{$keys['status']} = ENTITY_CUSTOM;
+        if (entity_plus_has_status($entity_type, $entity, ENTITY_PLUS_OVERRIDDEN)) {
+          $entity->{$keys['status']} = ENTITY_PLUS_CUSTOM;
           entity_plus_save($entity_type, $entity);
         }
         else {
@@ -844,11 +826,11 @@ function _entity_plus_defaults_rebuild($entity_type) {
     $existing_entities = entity_load_multiple_by_name($entity_type, array_keys($entities));
 
     foreach ($existing_entities as $name => $entity) {
-      if (entity_plus_has_status($entity_type, $entity, ENTITY_CUSTOM)) {
+      if (entity_plus_has_status($entity_type, $entity, ENTITY_PLUS_CUSTOM)) {
         // If the entity already exists but is not yet marked as overridden, we
         // have to update the status.
-        if (!entity_plus_has_status($entity_type, $entity, ENTITY_OVERRIDDEN)) {
-          $entity->{$keys['status']} |= ENTITY_OVERRIDDEN;
+        if (!entity_plus_has_status($entity_type, $entity, ENTITY_PLUS_OVERRIDDEN)) {
+          $entity->{$keys['status']} |= ENTITY_PLUS_OVERRIDDEN;
           $entity->{$keys['module']} = $entities[$name]->{$keys['module']};
           $entity->is_rebuild = TRUE;
           entity_plus_save($entity_type, $entity);
@@ -876,10 +858,10 @@ function _entity_plus_defaults_rebuild($entity_type) {
       $originals[$name] = $entity->original;
 
       if (!isset($entity->{$keys['status']})) {
-        $entity->{$keys['status']} = ENTITY_IN_CODE;
+        $entity->{$keys['status']} = ENTITY_PLUS_IN_CODE;
       }
       else {
-        $entity->{$keys['status']} |= ENTITY_IN_CODE;
+        $entity->{$keys['status']} |= ENTITY_PLUS_IN_CODE;
       }
       $entity->is_rebuild = TRUE;
       entity_plus_save($entity_type, $entity);
@@ -975,5 +957,56 @@ function entity_plus_theme() {
       'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
       'file' => 'entity_plus.theme.inc',
     ),
+    'entity_plus_property' => array(
+      'render element' => 'elements',
+      'path' => backdrop_get_path('module', 'entity_plus') . '/theme',
+      'file' => 'entity_plus.theme.inc',
+    ),
   );
+}
+/**
+ * Checks whether an entity type is fieldable.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ *
+ * @return
+ *   TRUE if the entity type is fieldable, FALSE otherwise.
+ */
+function entity_plus_type_is_fieldable($entity_type) {
+  $info = entity_get_info($entity_type);
+  return !empty($info['fieldable']);
+}
+
+/**
+ * Returns the language of an entity.
+ *
+ * @param string $entity_type
+ *   The entity type; e.g., 'node' or 'user'.
+ * @param Entity $entity
+ *   The entity for which to get the language.
+ *
+ * @return
+ *   A valid language code or NULL if the entity has no language support.
+ */
+function entity_plus_language($entity_type, $entity) {
+  $info = entity_get_info($entity_type);
+
+  // Invoke the callback to get the language. If there is no callback, try to
+  // get it from a property of the entity, otherwise NULL.
+  if (isset($info['language callback']) && function_exists($info['language callback'])) {
+    $langcode = $info['language callback']($entity_type, $entity);
+  }
+  elseif (!empty($info['entity keys']['language']) && isset($entity->{$info['entity keys']['language']})) {
+    $langcode = $entity->{$info['entity keys']['language']};
+  }
+  elseif (isset($entity->langcode)) {
+    // Backdrop added the property langcode as default for core entities.
+    $langcode = $entity->langcode;
+  }
+  else {
+    $langcode = LANGUAGE_NONE;
+  }
+
+  return $langcode;
 }

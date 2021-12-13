@@ -201,6 +201,19 @@ function entity_plus_field_info_alter(&$field_info) {
     $field_info['image']['property_callbacks'][] = 'entity_plus_metadata_field_file_callback';
     $field_info['image']['property_callbacks'][] = 'entity_plus_metadata_field_image_callback';
   }
+  if (module_exists('email')) {
+    $field_info['email']['property_type'] = 'text';
+  }
+  foreach (array('date', 'datetime', 'datestamp') as $date_type) {
+    if (isset($field_info[$date_type])) {
+      $field_info[$date_type]['property_type'] = 'date';
+      $field_info[$date_type]['property_callbacks'][] = 'entity_plus_metadata_field_date_callback';
+    }
+  }
+  if (module_exists('link')) {
+    $field_info['link_field']['property_type'] = 'field_item_link';
+    $field_info['link_field']['property_callbacks'][] = 'entity_plus_metadata_field_link_callback';
+  }
 }
 
 /**

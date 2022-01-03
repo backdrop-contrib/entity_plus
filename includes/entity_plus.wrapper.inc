@@ -1301,7 +1301,7 @@ class EntityMetadataArrayObject implements ArrayAccess, Countable, IteratorAggre
   /**
    * Implements the ArrayAccess interface.
    */
-   public function offsetExists($delta) {
+  public function offsetExists($delta) {
     return array_key_exists($delta, $this->data);
   }
 
@@ -1339,7 +1339,8 @@ class EntityMetadataArrayObject implements ArrayAccess, Countable, IteratorAggre
  */
 class EntityDefaultMetadataController {
 
-  protected $type, $info;
+  protected $type;
+  protected $info;
 
   /**
    * Contructor.
@@ -1417,7 +1418,7 @@ class EntityDefaultMetadataController {
   }
 
   /**
-   * Return a set of properties for an entity based on the schema definition
+   * Return a set of properties for an entity based on the schema definition.
    */
   protected function convertSchema() {
     return entity_plus_metadata_convert_schema($this->info['base table']);
@@ -1435,7 +1436,7 @@ interface EntityExtraFieldsControllerInterface {
   /**
    * Returns extra fields for this entity type.
    *
-   * @see hook_field_extra_fields().
+   * @see hook_field_extra_fields()
    */
   public function fieldExtraFields();
 }

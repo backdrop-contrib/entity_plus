@@ -282,27 +282,37 @@ function entity_plus_property_verify_data_type($data, $type) {
     case 'site':
     case 'unknown':
       return TRUE;
+
     case 'date':
     case 'duration':
     case 'integer':
       return is_numeric($data) && strpos($data, '.') === FALSE;
+
     case 'decimal':
       return is_numeric($data);
+
     case 'text':
       return is_scalar($data);
+
     case 'token':
       return is_scalar($data) && preg_match('!^[a-z][a-z0-9_]*$!', $data);
+
     case 'boolean':
       return is_scalar($data) && (is_bool($data) || $data == 0 || $data == 1);
+
     case 'uri':
       return valid_url($data, TRUE);
+
     case 'list':
       return (is_array($data) && array_values($data) == $data) || (is_object($data) && $data instanceof EntityMetadataArrayObject);
+
     case 'entity':
       return is_object($data) && $data instanceof EntityBackdropWrapper;
+
     default:
     case 'struct':
       return is_object($data) || is_array($data);
+
   }
 }
 
@@ -366,7 +376,7 @@ function entity_plus_property_values_create_entity($entity_plus_type, $values = 
  *   The contained type or FALSE, if the given type string is no list.
  */
 function entity_plus_property_list_extract_type($type) {
-  if (strpos($type, 'list<') === 0 && $type[strlen($type)-1] == '>') {
+  if (strpos($type, 'list<') === 0 && $type[strlen($type) - 1] == '>') {
     return substr($type, 5, -1);
   }
   return FALSE;
@@ -382,7 +392,7 @@ function entity_plus_property_list_extract_type($type) {
  *   For list types, the innermost type. The type itself otherwise.
  */
 function entity_plus_property_extract_innermost_type($type) {
-  while (strpos($type, 'list<') === 0 && $type[strlen($type)-1] == '>') {
+  while (strpos($type, 'list<') === 0 && $type[strlen($type) - 1] == '>') {
     $type = substr($type, 5, -1);
   }
   return $type;

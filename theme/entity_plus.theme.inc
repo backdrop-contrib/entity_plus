@@ -108,7 +108,7 @@ function template_preprocess_entity_plus_property(&$variables, $hook) {
  * Renders a property using simple defaults based upon the property type.
  *
  * @return string
- *    The rendered property value.
+ *   The rendered property value.
  */
 function entity_plus_property_default_render_value_by_type(EntityMetadataWrapper $property) {
   // If there is an options list or entity label, render that by default.

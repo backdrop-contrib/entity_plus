@@ -222,7 +222,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
   /**
    * Overridden. In contrast to the parent implementation we factor out query execution, so fetching can be further customized easily.
    * 
-   * @see BackdropDefaultEntityController::load($ids, $conditions)
+   * @see BackdropDefaultEntityController::load()
    */
   public function load($ids = array(), $conditions = array()) {
     $entities = array();

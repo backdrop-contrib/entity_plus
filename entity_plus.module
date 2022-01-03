@@ -286,10 +286,7 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
   // Set access callbacks.
   $entity_plus_info['node']['access callback'] = 'entity_plus_metadata_no_hook_node_access';
   $entity_plus_info['user']['access callback'] = 'entity_plus_metadata_user_access';
-  // File entity has it's own entity_plus_access function.
-  if (!module_exists('file_entity')) {
-    $entity_plus_info['file']['access callback'] = 'entity_plus_metadata_file_access';
-  }
+  $entity_plus_info['file']['access callback'] = 'entity_plus_metadata_file_access';
 
   // CRUD function callbacks.
   $entity_plus_info['node']['creation callback'] = 'entity_plus_metadata_create_node';

@@ -819,23 +819,39 @@ function entity_plus_metadata_taxonomy_access($op, $entity = NULL, $account = NU
 
 /**
  * Access callback for file entities.
+ * 
+ * @see entity_plus_access()
+ *
+ * @param $op
+ *   The operation being performed. One of 'view', 'download', 'update', 'create' or
+ *   'delete'.
+ * @param $file
+ *   A file to check access for. Must be a file object. Must have fid,
+ *   except in the case of 'create' operations.
+ * @param $account
+ *   The user to check for. Leave it to NULL to check for the global user.
+ *
+ * @throws EntityMalformedException
+ *
+ * @return boolean
+ *   TRUE if access is allowed, FALSE otherwise.
  */
-function entity_plus_metadata_file_access($op, $file = NULL, $account = NULL, $entity_plus_type = NULL) {
-  // We can only check access for the current user, so return FALSE on other accounts.
-  global $user;
-  if ($op == 'view' && isset($file) && (!isset($account) || $user->uid == $account->uid)) {
-    // Invoke hook_file_download() to obtain access information.
-    foreach (module_implements('file_download') as $module) {
-      $result = module_invoke($module, 'file_download', $file->uri);
-      if ($result == -1) {
-        return FALSE;
-      }
+function entity_plus_metadata_file_access($op, $file = NULL, $account = NULL, $entity_plus_type) {dpm($file);
+  // First deal with the case where a $file is provided and op is 'create'.
+  if (isset($file) && $op == 'create') {
+    if (isset($file->type)) {
+      return file_access($op, $file->type, $account);
     }
+    else {
+      throw new EntityMalformedException('Permission to create a file was requested but no file type was given.');
+    }
+  }
+  // No file is provided. Check for access to all files.
+  if (file_access($op, $file, $account)) {
     return TRUE;
   }
   return FALSE;
 }
-
 
 /**
  * Callback to determine access for properties which are fields.

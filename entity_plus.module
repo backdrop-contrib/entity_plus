@@ -76,7 +76,7 @@ function emw($type, $data = NULL, array $info = array()) {
   return entity_metadata_wrapper($type, $data, $info);
 }
 
-/** 
+/**
  * Implements hook_autoload_info().
  */
 function entity_plus_autoload_info() {
@@ -180,7 +180,7 @@ function entity_plus_crud_get_info() {
   return $types;
 }
 
-/** 
+/**
  * Helper function that returns an array of core modules.
  */
 function _entity_plus_metadata_core_modules() {
@@ -447,7 +447,7 @@ function entity_plus_metadata_convert_schema($table) {
   return $properties;
 }
 
-/** 
+/**
  * Helper function that converts a schema type to a type we understand.
  */
 function _entity_plus_metadata_convert_schema_type($type) {
@@ -537,7 +537,7 @@ function entity_plus_build_content($entity_plus_type, $entity, $view_mode = 'ful
  * );
  * @endcode
  *
- * @param integer $entity_plus_id
+ * @param int $entity_plus_id
  *   The ID of the entity to load, passed by the menu URL.
  * @param string $entity_plus_type
  *   The type of the entity to load.
@@ -583,7 +583,7 @@ function entity_load_multiple_by_name($entity_plus_type, $names = FALSE, $condit
  *
  * @param string $entity_plus_type
  *   The type of the entity.
- * @param integer $revision_id
+ * @param int $revision_id
  *   The id of the revision to load.
  *
  * @return object
@@ -604,7 +604,7 @@ function entity_plus_revision_load($entity_plus_type, $revision_id) {
  *
  * @param string $entity_plus_type
  *   The type of the entity.
- * @param integer $revision_id
+ * @param int $revision_id
  *   The revision ID to delete.
  *
  * @return bool
@@ -688,7 +688,7 @@ function entity_plus_revision_set_default($entity_plus_type, $entity) {
  *   The type of the entity.
  * @param Entity $entity
  *   The entity to check the status on.
- * @param integer $status
+ * @param int $status
  *   The constant status like ENTITY_PLUS_CUSTOM, ENTITY_PLUS_IN_CODE, ENTITY_PLUS_OVERRIDDEN
  *   or ENTITY_PLUS_FIXED.
  *
@@ -839,7 +839,11 @@ function _entity_plus_defaults_rebuild($entity_plus_type) {
 
     // Check for defaults that disappeared.
     $existing_defaults = entity_load_multiple_by_name($entity_plus_type, FALSE, array(
-      $keys['status'] => array(ENTITY_PLUS_OVERRIDDEN, ENTITY_PLUS_IN_CODE, ENTITY_PLUS_FIXED)
+      $keys['status'] => array(
+        ENTITY_PLUS_OVERRIDDEN,
+        ENTITY_PLUS_IN_CODE,
+        ENTITY_PLUS_FIXED,
+      )
     ));
 
     foreach ($existing_defaults as $name => $entity) {
@@ -939,7 +943,7 @@ function entity_plus_get_extra_fields_controller($type = NULL) {
  * @param Entity $entity
  *   The entity to save.
  *
- * @return integer
+ * @return int
  *   For entity types provided by the CRUD API, SAVED_NEW or SAVED_UPDATED is
  *   returned depending on the operation performed. If there is no information
  *   how to save the entity, FALSE is returned.

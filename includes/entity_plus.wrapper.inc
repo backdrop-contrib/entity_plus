@@ -212,6 +212,7 @@ abstract class EntityMetadataWrapper {
 
   /**
    * Determines whether the given user has access to view or edit this property.
+   * 
    * Apart from relying on access metadata of properties, this takes into
    * account information about entity level access, if available:
    *  - Referenced entities can only be viewed, when the user also has
@@ -360,6 +361,7 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
    *   The language code of the language to set.
    * 
    * @return EntityWrapper
+   *   An EntityWrapper.
    */
   public function language($langcode = LANGUAGE_NONE) {
     if ($langcode != $this->langcode) {
@@ -396,7 +398,12 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
     // Look it up in the cache if possible.
     if (!array_key_exists($name, $this->cache)) {
       if ($info = $this->getPropertyInfo($name)) {
-        $info += array('parent' => $this, 'name' => $name, 'langcode' => $this->langcode, 'property defaults' => array());
+        $info += array(
+          'parent' => $this,
+          'name' => $name,
+          'langcode' => $this->langcode,
+          'property defaults' => array()
+        );
         $info['property defaults'] += $this->info['property defaults'];
         $this->cache[$name] = entity_metadata_wrapper($info['type'], NULL, $info);
       }
@@ -500,7 +507,7 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
     }
   }
 
-  /** 
+  /**
    * Checks for access privileges to a property.
    */
   protected function propertyAccess($name, $op, $account = NULL) {
@@ -536,8 +543,8 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
     return isset($this->propertyInfo['properties'][$name]);
   }
 
-  /** 
-   * Retrieve an external iterator
+  /**
+   * Retrieve an external iterator.
    */
   public function getIterator() {
     $this->spotInfo();
@@ -560,7 +567,7 @@ class EntityStructureWrapper extends EntityMetadataWrapper implements IteratorAg
     return $vars;
   }
 
-  /** 
+  /**
    * Overrides EntityStructureWrapper:clear().
    */
   public function clear() {
@@ -864,6 +871,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
    *   If the entity type does not support saving.
    *
    * @return EntityBackdropWrapper
+   *   The saved entity wrapper. 
    */
   public function save() {
     if ($this->data) {
@@ -873,7 +881,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
       $this->data->save();
       // On insert, update the identifier afterwards.
       if (!$this->id) {
-        list($this->id, , ) = entity_extract_ids($this->type, $this->data);
+        list($this->id, ,) = entity_extract_ids($this->type, $this->data);
       }
     }
     // If the entity hasn't been loaded yet, don't bother saving it.
@@ -884,6 +892,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
    * Permanently delete the wrapped entity.
    *
    * @return EntityBackdropWrapper
+   *   An entity wrapper for the deleted entity.
    */
   public function delete() {
     if ($this->dataAvailable() && $this->value()) {
@@ -907,6 +916,7 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
    *
    * @param string $name
    *   One of 'id', 'name', 'bundle' or 'revision'.
+   * 
    * @return string
    *   The name of the key used by the entity.
    */
@@ -939,6 +949,9 @@ class EntityBackdropWrapper extends EntityStructureWrapper {
     return $vars;
   }
 
+  /**
+   * Magic wake up function.
+   */
   public function __wakeup() {
     $this->setUp();
     if ($this->id !== FALSE) {
@@ -963,12 +976,11 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
   protected $itemType;
 
   /**
-   * Whether this is a list of entities with a known entity type, i.e. for
-   * generic list of entities (list<entity>) this is FALSE.
+   * Whether this is a list of entities with a known entity type, i.e. for generic list of entities (list<entity>) this is FALSE.
    */
   protected $isEntityList;
 
-  /** 
+  /**
    * Constructs a new EntityListWrapper object.
    *
    * @param string $type
@@ -1035,7 +1047,7 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
     return $this->getPropertyValue($delta);
   }
 
-  /** 
+  /**
    * Overrides EntityMetadataWrapper::setProperty().
    */
   protected function setProperty($delta, $value) {
@@ -1046,7 +1058,7 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
     }
   }
 
-  /** 
+  /**
    * Checks for access privileges to a property.
    */
   protected function propertyAccess($delta, $op, $account = NULL) {
@@ -1142,7 +1154,7 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
   }
 
   /**
-   * Implements the Countable interface
+   * Implements the Countable interface.
    */
   public function count() {
     return $this->dataAvailable() ? count($this->value()) : 0;
@@ -1186,7 +1198,8 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
 /**
  * Provide a separate Exception so it can be caught separately.
  */
-class EntityMetadataWrapperException extends Exception { }
+class EntityMetadataWrapperException extends Exception {
+}
 
 
 /**
@@ -1195,7 +1208,8 @@ class EntityMetadataWrapperException extends Exception { }
 class EntityMetadataWrapperIterator implements RecursiveIterator {
 
   protected $position = 0;
-  protected $wrapper, $keys;
+  protected $wrapper;
+  protected $keys;
 
   /**
    * Constructor.
@@ -1208,35 +1222,35 @@ class EntityMetadataWrapperIterator implements RecursiveIterator {
   /**
    * Implements RecursiveIterator.
    */
-  function rewind() {
+  public function rewind() {
     $this->position = 0;
   }
 
   /**
    * Implements RecursiveIterator.
    */
-  function current() {
+  public function current() {
     return $this->wrapper->get($this->keys[$this->position]);
   }
 
   /**
    * Implements RecursiveIterator.
    */
-  function key() {
+  public function key() {
     return $this->keys[$this->position];
   }
 
   /**
    * Implements RecursiveIterator.
    */
-  function next() {
+  public function next() {
     $this->position++;
   }
 
   /**
    * Implements RecursiveIterator.
    */
-  function valid() {
+  public function valid() {
     return isset($this->keys[$this->position]);
   }
 

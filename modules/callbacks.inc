@@ -313,7 +313,7 @@ function entity_plus_metadata_taxonomy_term_get_properties($term, array $options
         $tids[] = $parent->tid;
       }
       return $tids;
-   
+
     case 'vocabulary':
       return taxonomy_vocabulary_load($term->vocabulary);
   }
@@ -1180,7 +1180,7 @@ function entity_plus_metadata_date_struct_setter(&$item, $name, $value, $langcod
   }
 }
 
-/** 
+/**
  * Callback for creating a new, empty link field item.
  *
  * @see entity_plus_metadata_field_link_callback()

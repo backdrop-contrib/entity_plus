@@ -239,7 +239,7 @@ function entity_plus_metadata_field_date_callback(&$info, $entity_type, $field, 
     $property['microdata'] = TRUE;
   }
 }
-  
+
 /**
  * Callback to alter the property info of link fields.
  * 

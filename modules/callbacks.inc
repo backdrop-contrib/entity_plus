@@ -822,21 +822,21 @@ function entity_plus_metadata_taxonomy_access($op, $entity = NULL, $account = NU
  * 
  * @see entity_plus_access()
  *
- * @param $op
+ * @param string $op
  *   The operation being performed. One of 'view', 'download', 'update', 'create' or
  *   'delete'.
- * @param $file
+ * @param File $file
  *   A file to check access for. Must be a file object. Must have fid,
  *   except in the case of 'create' operations.
- * @param $account
+ * @param User $account
  *   The user to check for. Leave it to NULL to check for the global user.
  *
  * @throws EntityMalformedException
  *
- * @return boolean
+ * @return bool
  *   TRUE if access is allowed, FALSE otherwise.
  */
-function entity_plus_metadata_file_access($op, $file = NULL, $account = NULL, $entity_plus_type) {dpm($file);
+function entity_plus_metadata_file_access($op, $file = NULL, $account = NULL) {
   // First deal with the case where a $file is provided and op is 'create'.
   if (isset($file) && $op == 'create') {
     if (isset($file->type)) {

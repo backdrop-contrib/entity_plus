@@ -44,7 +44,7 @@ function entity_plus_metadata_field_entity_property_info() {
 
 /**
  * Callback to add in property info defaults per field instance.
- * @see entity_plus_metadata_field_entity_property_info().
+ * @see entity_plus_metadata_field_entity_property_info()
  */
 function entity_plus_metadata_field_default_property_callback(&$info, $entity_plus_type, $field, $instance, $field_type) {
   if (!empty($field_type['property_type'])) {
@@ -79,10 +79,7 @@ function entity_plus_metadata_field_default_property_callback(&$info, $entity_pl
 }
 
 /**
- * Additional callback to adapt the property info for text fields. If a text
- * field is processed we make use of a separate data structure so that format
- * filters are available too. For the text value the sanitized, thus processed
- * value is returned by default.
+ * Additional callback to adapt the property info for text fields. If a text field is processed we make use of a separate data structure so that format filters are available too. For the text value the sanitized, thus processed value is returned by default.
  *
  * @see entity_plus_metadata_field_entity_property_info()
  * @see entity_plus_field_info_alter()
@@ -99,7 +96,7 @@ function entity_plus_metadata_field_text_property_callback(&$info, $entity_plus_
     unset($property['query callback']);
 
     if (empty($instance['settings']['text_processing'])) {
-      $property['property info'] =  entity_plus_property_field_item_textsummary_info();
+      $property['property info'] = entity_plus_property_field_item_textsummary_info();
     }
     else {
       // For formatted text we use the type name 'text_formatted'.
@@ -118,7 +115,7 @@ function entity_plus_metadata_field_text_property_callback(&$info, $entity_plus_
 
 /**
  * Additional callback to adapt the property info for term reference fields.
- * @see entity_plus_metadata_field_entity_property_info().
+ * @see entity_plus_metadata_field_entity_property_info()
  */
 function entity_plus_metadata_field_term_reference_callback(&$info, $entity_plus_type, $field, $instance, $field_type) {
   $property = &$info[$entity_plus_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
@@ -135,7 +132,7 @@ function entity_plus_metadata_field_term_reference_callback(&$info, $entity_plus
 
 /**
  * Additional callback to adapt the property info for file fields.
- * @see entity_plus_metadata_field_entity_property_info().
+ * @see entity_plus_metadata_field_entity_property_info()
  */
 function entity_plus_metadata_field_file_callback(&$info, $entity_plus_type, $field, $instance, $field_type) {
   $property = &$info[$entity_plus_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
@@ -160,9 +157,9 @@ function entity_plus_metadata_field_file_callback(&$info, $entity_plus_type, $fi
 }
 
 /**
- * Additional callback to adapt the property info for image fields.
- * This callback gets invoked after entity_plus_metadata_field_file_callback().
- * @see entity_plus_metadata_field_entity_property_info().
+ * Additional callback to adapt the property info for image fields. This callback gets invoked after entity_plus_metadata_field_file_callback().
+ * 
+ * @see entity_plus_metadata_field_entity_property_info()
  */
 function entity_plus_metadata_field_image_callback(&$info, $entity_plus_type, $field, $instance, $field_type) {
   $property = &$info[$entity_plus_type]['bundles'][$instance['bundle']]['properties'][$field['field_name']];
@@ -179,7 +176,8 @@ function entity_plus_metadata_field_image_callback(&$info, $entity_plus_type, $f
 
 /**
  * Callback to alter the property info of date fields.
- * @see entity_plus_metadata_field_entity_property_info().
+ * 
+ * @see entity_plus_metadata_field_entity_property_info()
  */
 function entity_plus_metadata_field_date_callback(&$info, $entity_type, $field, $instance, $field_type) {
   $name = $field['field_name'];
@@ -218,7 +216,7 @@ function entity_plus_metadata_field_date_callback(&$info, $entity_type, $field, 
         // will not provide the field name as $name, we'll add it to $info.
         'field_name' => $field['field_name'],
         // Alert Microdata module that this value can be exposed in microdata.
-        // While microdata has not been ported to Backdrop, leave this here just in case 
+        // While microdata has not been ported to Backdrop, leave this here just in case.
         'microdata' => TRUE,
       ),
       'duration' => array(
@@ -237,11 +235,11 @@ function entity_plus_metadata_field_date_callback(&$info, $entity_type, $field, 
   else {
     // If this doesn't have a todate, it is handled as a date rather than a
     // struct. Enable microdata on the field itself rather than the properties.
-    // While microdata has not been ported to Backdrop, leave this here just in case 
+    // While microdata has not been ported to Backdrop, leave this here just in case.
     $property['microdata'] = TRUE;
   }
 }
-  
+
 /**
  * Callback to alter the property info of link fields.
  * 
@@ -288,4 +286,3 @@ function entity_plus_metadata_field_link_callback(&$info, $entity_type, $field, 
   }
   unset($property['query callback']);
 }
-

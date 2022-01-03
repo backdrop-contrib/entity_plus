@@ -65,7 +65,6 @@ function entity_plus_metadata_taxonomy_entity_property_info() {
     'getter callback' => 'entity_plus_metadata_taxonomy_term_get_properties',
     'raw getter callback' => 'entity_plus_property_verbatim_get',
     'type' => 'struct',
-    
     'property info' => array(
       'name' => array(
         'label' => t("Name"),

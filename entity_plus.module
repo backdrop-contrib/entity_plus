@@ -9,8 +9,8 @@
   */
 
 /**
-* A bit flag used to let us know if an entity is in the database.
-*/
+ * A bit flag used to let us know if an entity is in the database.
+ */
 define('ENTITY_PLUS_CUSTOM', 0x01);
 
 /**
@@ -31,8 +31,7 @@ define('ENTITY_PLUS_IN_CODE', 0x02);
 define('ENTITY_PLUS_OVERRIDDEN', 0x03);
 
 /**
-* A bit flag used to mark entities as fixed, thus not changeable for any
-* user.
+* A bit flag used to mark entities as fixed, thus not changeable for any user.
 */
 define('ENTITY_PLUS_FIXED', 0x04 | 0x02);
 
@@ -40,6 +39,9 @@ module_load_include('inc', 'entity_plus', 'modules/callbacks');
 module_load_include('inc', 'entity_plus', 'includes/entity_plus.property');
 module_load_include('inc', 'entity_plus', 'views/entity_plus.views');
 
+/**
+ * Provides an Entity Metadata Wrapper.
+ */
 function entity_metadata_wrapper($type, $data = NULL, array $info = array()) {
   if ($type == 'entity' || (($entity_plus_info = entity_get_info()) && isset($entity_plus_info[$type]))) {
     // If the passed entity is the global $user, we load the user object by only
@@ -74,6 +76,9 @@ function emw($type, $data = NULL, array $info = array()) {
   return entity_metadata_wrapper($type, $data, $info);
 }
 
+/** 
+ * Implements hook_autoload_info().
+ */
 function entity_plus_autoload_info() {
   return array(
     'EntityValueWrapper' => 'includes/entity_plus.wrapper.inc',
@@ -143,9 +148,9 @@ function entity_plus_entity_property_info() {
  * Unlike entity_extract_ids() this function returns the name of the entity
  * instead of the numeric id, in case the entity type has specified a name key.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $entity
+ * @param Entity $entity
  *   An entity object.
  *
  * @see entity_extract_ids()
@@ -162,9 +167,8 @@ function entity_plus_id($entity_plus_type, $entity) {
 /**
  * Get the entity info for the entity types provided via the entity CRUD API.
  *
- * @return
- *  An array in the same format as entity_get_info(), containing the entities
- *  whose controller class implements the EntityPlusControllerInterface.
+ * @return array
+ *   An array in the same format as entity_get_info(), containing the entities whose controller class implements the EntityPlusControllerInterface.
  */
 function entity_plus_crud_get_info() {
   $types = array();
@@ -176,10 +180,26 @@ function entity_plus_crud_get_info() {
   return $types;
 }
 
+/** 
+ * Helper function that returns an array of core modules.
+ */
 function _entity_plus_metadata_core_modules() {
-  return array_filter(array('book', 'comment', 'field', 'locale', 'node', 'taxonomy', 'user', 'system', 'statistics'), 'module_exists');
+  return array_filter(array(
+    'book',
+    'comment',
+    'field',
+    'locale',
+    'node',
+    'taxonomy',
+    'user',
+    'system',
+    'statistics',
+  ), 'module_exists');
 }
 
+/**
+ * Implements hook_implements_alter().
+ */
 function entity_plus_module_implements_alter(&$implementations, $hook) {
   if ($hook == 'entity_info_alter') {
     // Move our hook implementation to the bottom.
@@ -192,13 +212,12 @@ function entity_plus_module_implements_alter(&$implementations, $hook) {
 /**
  * Determines whether for the given entity type a given operation is available.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $op
- *   One of 'create', 'view', 'save', 'delete', 'revision delete', 'access' or
- *   'form'.
+ * @param string $op
+ *   One of 'create', 'view', 'save', 'delete', 'revision delete', 'access' or 'form'.
  *
- * @return boolean
+ * @return bool
  *   Whether the entity type supports the given operation.
  */
 function entity_plus_type_supports($entity_plus_type, $op) {
@@ -329,16 +348,16 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
  * view a single entity without any id, e.g. for generating a preview during
  * creation.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $entities
+ * @param array $entities
  *   An array of entities to render.
- * @param $view_mode
+ * @param string $view_mode
  *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
- * @param $langcode
+ * @param string $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
- * @param $page
+ * @param bool $page
  *   (optional) If set will control if the entity is rendered: if TRUE
  *   the entity will be rendered without its title, so that it can be embeded
  *   in another context. If FALSE the entity will be displayed with its title
@@ -347,7 +366,8 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
  *   of the entity, as returned by entity_uri().
  *   This parameter is only supported for entities which controller is a
  *   EntityPlusControllerInterface.
- * @return
+ * 
+ * @return array
  *   The renderable array, keyed by the entity type and by entity identifiers,
  *   for which the entity name is used if existing - see entity_plus_id(). If there
  *   is no information on how to view an entity, FALSE is returned.
@@ -375,18 +395,18 @@ function entity_plus_view($entity_plus_type, $entities, $view_mode = 'full', $la
  * $access = entity_plus_access('create', 'node', $node, $account);
  * @endcode
  *
- * @param $op
+ * @param string $op
  *   The operation being performed. One of 'view', 'update', 'create' or
  *   'delete'.
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The entity type of the entity to check for.
- * @param $entity
+ * @param Entity $entity
  *   Optionally an entity to check access for. If no entity is given, it will be
  *   determined whether access is allowed for all entities of the given type.
- * @param $account
+ * @param object $account
  *   The user to check for. Leave it to NULL to check for the global user.
  *
- * @return boolean
+ * @return bool
  *   Whether access is allowed or not. If the entity type does not specify any
  *   access information, NULL is returned.
  *
@@ -401,9 +421,10 @@ function entity_plus_access($op, $entity_plus_type, $entity = NULL, $account = N
 /**
  * Converts the schema information available for the given table to property info.
  *
- * @param $table
+ * @param string $table
  *   The name of the table as used in hook_schema().
- * @return
+ * 
+ * @return array
  *   An array of property info as suiting for hook_entity_property_info().
  */
 function entity_plus_metadata_convert_schema($table) {
@@ -426,15 +447,20 @@ function entity_plus_metadata_convert_schema($table) {
   return $properties;
 }
 
+/** 
+ * Helper function that converts a schema type to a type we understand.
+ */
 function _entity_plus_metadata_convert_schema_type($type) {
   switch ($type) {
     case 'int':
     case 'serial':
     case 'date':
       return 'integer';
+
     case 'float':
     case 'numeric':
       return 'decimal';
+
     case 'char':
     case 'varchar':
     case 'text':
@@ -448,7 +474,7 @@ function _entity_plus_metadata_convert_schema_type($type) {
  *
  * @param array $entities
  *   The array of entities to convert.
- * @param $property
+ * @param string $property
  *   The name of entity property, by which the array should be keyed. To get
  *   reasonable results, the property has to have unique values.
  *
@@ -473,16 +499,17 @@ function entity_plus_key_array_by_property(array $entities, $property) {
  * Note: Currently, this only works for entity types provided with the entity
  * CRUD API.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $entity
+ * @param Entity $entity
  *   An entity object.
- * @param $view_mode
+ * @param string $view_mode
  *   A view mode as used by this entity type, e.g. 'full', 'teaser'...
- * @param $langcode
+ * @param string $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
- * @return
+ * 
+ * @return array
  *   The renderable array.
  */
 function entity_plus_build_content($entity_plus_type, $entity, $view_mode = 'full', $langcode = NULL) {
@@ -510,11 +537,12 @@ function entity_plus_build_content($entity_plus_type, $entity, $view_mode = 'ful
  * );
  * @endcode
  *
- * @param $entity_plus_id
+ * @param integer $entity_plus_id
  *   The ID of the entity to load, passed by the menu URL.
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity to load.
- * @return
+ * 
+ * @return object
  *   A fully loaded entity object, or FALSE in case of error.
  */
 function entity_plus_object_load($entity_plus_id, $entity_plus_type) {
@@ -525,17 +553,17 @@ function entity_plus_object_load($entity_plus_id, $entity_plus_type) {
 /**
  * A wrapper around entity_load() to return entities keyed by name key if existing.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The entity type to load, e.g. node or user.
- * @param $names
+ * @param array $names
  *   An array of entity names or ids, or FALSE to load all entities.
- * @param $conditions
+ * @param array $conditions
  *   (deprecated) An associative array of conditions on the base table, where
  *   the keys are the database fields and the values are the values those
  *   fields must have. Instead, it is preferable to use EntityFieldQuery to
  *   retrieve a list of entity IDs loadable by this function.
  *
- * @return
+ * @return array
  *   An array of entity objects indexed by their names (or ids if the entity
  *   type has no name key).
  *
@@ -553,12 +581,12 @@ function entity_load_multiple_by_name($entity_plus_type, $names = FALSE, $condit
 /**
  * Loads an entity revision.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $revision_id
+ * @param integer $revision_id
  *   The id of the revision to load.
  *
- * @return
+ * @return object
  *   The entity object, or FALSE if there is no entity with the given revision
  *   id.
  */
@@ -574,12 +602,12 @@ function entity_plus_revision_load($entity_plus_type, $revision_id) {
 /**
  * Deletes an entity revision.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $revision_id
+ * @param integer $revision_id
  *   The revision ID to delete.
  *
- * @return
+ * @return bool
  *   TRUE if the entity revision could be deleted, FALSE otherwise.
  */
 function entity_plus_revision_delete($entity_plus_type, $revision_id) {
@@ -599,12 +627,12 @@ function entity_plus_revision_delete($entity_plus_type, $revision_id) {
  * Note that newly created entities will always be created in default revision,
  * thus TRUE is returned for not yet saved entities.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $entity
+ * @param Entity $entity
  *   The entity object to check.
  *
- * @return boolean
+ * @return bool
  *   A boolean indicating whether the entity is in default revision is returned.
  *   If the entity is not revisionable or is new, TRUE is returned.
  *
@@ -638,9 +666,9 @@ function entity_plus_revision_is_default($entity_plus_type, $entity) {
  * based upon the EntityPlusController, i.e. implementing the
  * EntityPlusControllerRevisionableInterface.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $entity
+ * @param Entity $entity
  *   The entity revision to update.
  *
  * @see entity_revision_is_default()
@@ -656,15 +684,15 @@ function entity_plus_revision_set_default($entity_plus_type, $entity) {
 /**
  * Checks if a given entity has a certain exportable status.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $entity
+ * @param Entity $entity
  *   The entity to check the status on.
- * @param $status
+ * @param integer $status
  *   The constant status like ENTITY_PLUS_CUSTOM, ENTITY_PLUS_IN_CODE, ENTITY_PLUS_OVERRIDDEN
  *   or ENTITY_PLUS_FIXED.
  *
- * @return
+ * @return bool
  *   TRUE if the entity has the status, FALSE otherwise.
  */
 function entity_plus_has_status($entity_plus_type, $entity, $status) {
@@ -761,7 +789,7 @@ function entity_plus_var_json_export($var, $prefix = '') {
  * unless they have been overridden. In that case the overridden entity is left
  * in the database, but its status gets updated to 'custom'.
  *
- * @param $entity_plus_types
+ * @param array $entity_plus_types
  *   (optional) If specified, only the defaults of the given entity types are
  *   rebuilt.
  */
@@ -786,7 +814,11 @@ function _entity_plus_defaults_rebuild($entity_plus_type) {
   if (lock_acquire('entity_plus_rebuild_' . $entity_plus_type)) {
     $info = entity_get_info($entity_plus_type);
     $hook = isset($info['export']['default hook']) ? $info['export']['default hook'] : 'default_' . $entity_plus_type;
-    $keys = $info['entity keys'] + array('module' => 'module', 'status' => 'status', 'name' => $info['entity keys']['id']);
+    $keys = $info['entity keys'] + array(
+      'module' => 'module',
+      'status' => 'status',
+      'name' => $info['entity keys']['id']
+    );
 
     // Check for the existence of the module and status columns.
     if (!in_array($keys['status'], $info['schema_fields_sql']['base table']) || !in_array($keys['module'], $info['schema_fields_sql']['base table'])) {
@@ -806,7 +838,9 @@ function _entity_plus_defaults_rebuild($entity_plus_type) {
     backdrop_alter($hook, $entities);
 
     // Check for defaults that disappeared.
-    $existing_defaults = entity_load_multiple_by_name($entity_plus_type, FALSE, array($keys['status'] => array(ENTITY_PLUS_OVERRIDDEN, ENTITY_PLUS_IN_CODE, ENTITY_PLUS_FIXED)));
+    $existing_defaults = entity_load_multiple_by_name($entity_plus_type, FALSE, array(
+      $keys['status'] => array(ENTITY_PLUS_OVERRIDDEN, ENTITY_PLUS_IN_CODE, ENTITY_PLUS_FIXED)
+    ));
 
     foreach ($existing_defaults as $name => $entity) {
       if (empty($entities[$name])) {
@@ -900,12 +934,12 @@ function entity_plus_get_extra_fields_controller($type = NULL) {
  *
  * In case of failures, an exception is thrown.
  *
- * @param $entity_plus_type
+ * @param string $entity_plus_type
  *   The type of the entity.
- * @param $entity
+ * @param Entity $entity
  *   The entity to save.
  *
- * @return
+ * @return integer
  *   For entity types provided by the CRUD API, SAVED_NEW or SAVED_UPDATED is
  *   returned depending on the operation performed. If there is no information
  *   how to save the entity, FALSE is returned.
@@ -967,10 +1001,10 @@ function entity_plus_theme() {
 /**
  * Checks whether an entity type is fieldable.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The type of the entity.
  *
- * @return
+ * @return bool
  *   TRUE if the entity type is fieldable, FALSE otherwise.
  */
 function entity_plus_type_is_fieldable($entity_type) {
@@ -986,7 +1020,7 @@ function entity_plus_type_is_fieldable($entity_type) {
  * @param Entity $entity
  *   The entity for which to get the language.
  *
- * @return
+ * @return string
  *   A valid language code or NULL if the entity has no language support.
  */
 function entity_plus_language($entity_type, $entity) {

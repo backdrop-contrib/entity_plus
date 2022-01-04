@@ -843,7 +843,7 @@ function entity_plus_metadata_file_access($op, $file = NULL, $account = NULL) {
       return file_access($op, $file->type, $account);
     }
     else {
-      throw new EntityMalformedException('Permission to create a file was requested but no file type was given.');
+      throw new EntityMalformedException(t('Permission to create a file was requested but no file type was given.'));
     }
   }
   // No file is provided. Check for access to all files.

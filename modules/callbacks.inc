@@ -685,7 +685,7 @@ function entity_plus_metadata_no_hook_node_access($op, $node = NULL, $account = 
         return node_access($op, $node->type, $account);
       }
       else {
-        throw new EntityMalformedException('Permission to create a node was requested but no node type was given.');
+        throw new EntityMalformedException(t('Permission to create a node was requested but no node type was given.'));
       }
     }
     // If a non-default revision is given, incorporate revision access.

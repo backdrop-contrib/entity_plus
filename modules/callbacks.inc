@@ -11,6 +11,10 @@
 function entity_plus_metadata_entity_plus_get_properties($entity, array $options, $name, $entity_plus_type) {
   if ($name == 'url') {
     $return = entity_uri($entity_plus_type, $entity);
+    $return += array(
+      'path' => NULL,
+      'options' => array()
+    );
     return url($return['path'], $return['options'] + $options);
   }
 }

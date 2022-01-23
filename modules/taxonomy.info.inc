@@ -64,6 +64,7 @@ function entity_plus_metadata_taxonomy_entity_property_info() {
     'type' => 'taxonomy_vocabulary',
     'setter callback' => 'entity_plus_metadata_taxonomy_term_setter',
     'getter callback' => 'entity_plus_metadata_taxonomy_term_get_properties',
+    'raw getter callback' => 'entity_plus_metadata_taxonomy_term_get_raw_properties',
     'schema field' => 'vocabulary',
   );
   $properties['parent'] = array(

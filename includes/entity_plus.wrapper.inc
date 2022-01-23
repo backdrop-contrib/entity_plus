@@ -1199,11 +1199,11 @@ class EntityListWrapper extends EntityMetadataWrapper implements IteratorAggrega
  * Wrapper for Taxonomy Vocabularies.
  */
 class EntityVocabularyWrapper extends EntityStructureWrapper {
-  
-  protected $machine_name;
-  
+
+  protected $machineName;
+
   /**
-   * Overrides
+   * Overrides EntityStructureWrapper::__construct().
    */
   public function __construct($type, $data = NULL, $info = array()) {
     parent::__construct($type, $data, $info);
@@ -1220,7 +1220,7 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
       throw new EntityMetadataWrapperException('Invalid data value given. Be sure it matches the required data type and format.');
     }
 
-    $previous_machine_name = $this->machine_name;
+    $previous_machine_name = $this->machineName;
     // Set value, so we get the identifier and pass it to the normal setter.
     $this->clear();
     $this->setVocabulary($value);
@@ -1228,11 +1228,11 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
     // In case the vocabulary has been unset, we cannot properly detect changes as
     // the previous name defaults to FALSE for unloaded vocabularies too. So in that
     // case we just always update the parent.
-    if ($this->machine_name === FALSE && !$this->data) {
+    if ($this->machineName === FALSE && !$this->data) {
       $this->updateParent(NULL);
     }
-    elseif ($previous_machine_name !== $this->machine_name) {
-      $this->updateParent($this->machine_name);
+    elseif ($previous_machine_name !== $this->machineName) {
+      $this->updateParent($this->machineName);
     }
     return $this;
   }
@@ -1241,7 +1241,7 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
    * Overridden.
    */
   public function clear() {
-    $this->machine_name = NULL;
+    $this->machineName = NULL;
     parent::clear();
   }
 
@@ -1252,28 +1252,28 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
     // For vocabularies we allow getter callbacks to return FALSE, which we
     // interpret like NULL values as unset properties.
     if (isset($data) && $data !== FALSE && !is_object($data)) {
-      $this->machine_name = $data;
+      $this->machineName = $data;
       $this->data = FALSE;
     }
     elseif (is_object($data) && $data instanceof EntityVocabularyWrapper) {
       // We got a wrapped vocabulary passed, so take over its values.
-      $this->machine_name = $data->machine_name;
+      $this->machineName = $data->machineName;
       $this->data = $data->data;
     }
     elseif (is_object($data)) {
       // We got the entity object passed.
       $this->data = $data;
-      $machine_name = $data->machine_name;
-      $this->machine_name = isset($machine_name) ? $machine_name : FALSE;
+      $machine_name = $data->machineName;
+      $this->machineName = isset($machine_name) ? $machine_name : FALSE;
     }
     else {
-      $this->machine_name = FALSE;
+      $this->machineName = FALSE;
       $this->data = NULL;
     }
   }
 
   /**
-   * Permanently saves the wrapped vocabulary
+   * Permanently saves the wrapped vocabulary.
    *
    * @return EntityVocabularyWrapper
    *   The saved vocabulary wrapper. 
@@ -1299,11 +1299,11 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
       $this->setVocabulary(parent::value());
     }
     if (!empty($options['identifier'])) {
-      return $this->machine_name;
+      return $this->machineName;
     }
-    elseif (!$this->data && !empty($this->machine_name)) {
+    elseif (!$this->data && !empty($this->machineName)) {
       // Lazy load the vocabulary if necessary.
-      $return = taxonomy_vocabulary_load($this->machine_name);
+      $return = taxonomy_vocabulary_load($this->machineName);
       // In case the vocabulary cannot be loaded, we return NULL just as for empty
       // properties.
       $this->data = $return ? $return : NULL;
@@ -1318,7 +1318,7 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
     return $this->dataAvailable() ? $this->value(array('identifier' => TRUE)) : NULL;
   }
 
-  /** 
+  /**
    * Returns the human readable name of the vocabulary. 
    */
   public function label() {
@@ -1335,7 +1335,7 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
    */
   public function delete() {
     if ($this->dataAvailable() && $this->value()) {
-      taxonomy_vocabulary_delete($this->machine_name);
+      taxonomy_vocabulary_delete($this->machineName);
     }
     return $this;
   }

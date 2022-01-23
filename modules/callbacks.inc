@@ -341,8 +341,7 @@ function entity_plus_metadata_taxonomy_term_get_raw_properties($term, array $opt
 function entity_plus_metadata_taxonomy_term_setter($term, $name, $value) {
   switch ($name) {
     case 'vocabulary':
-      $term->vocabulary = $value->machine_name;
-      return $term->vocabulary;
+      return $term->vocabulary = $value;
 
     case 'parent':
       return $term->parent = $value;

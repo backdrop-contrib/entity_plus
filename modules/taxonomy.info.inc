@@ -116,7 +116,7 @@ function entity_plus_metadata_taxonomy_entity_property_info() {
     'label' => t("Term count"),
     'type' => 'integer',
     'description' => t("The number of terms belonging to the taxonomy vocabulary."),
-    'getter callback' => 'entity_metadata_taxonomy_vocabulary_get_properties',
+    'getter callback' => 'entity_plus_metadata_taxonomy_vocabulary_get_properties',
     'computed' => TRUE,
   );
 

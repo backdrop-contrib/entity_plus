@@ -1225,16 +1225,3 @@ function entity_plus_link_url_property_get($data, array $options, $name, $type, 
 function entity_plus_link_attribute_property_get($data, array $options, $name, $type, $info) {
   return isset($data[$name]) ? array_filter($data[$name]) : array();
 }
-
-/**
- * Callback for getting vocabulary properties.
- *
- * @see entity_metadata_taxonomy_entity_info_alter()
- */
-function entity_metadata_taxonomy_vocabulary_get_properties($vocabulary, array $options, $name) {
-  switch ($name) {
-    case 'term_count':
-      $sql = "SELECT COUNT (1) FROM {taxonomy_term_data} td WHERE td.vocabulary = :vocabulary";
-      return db_query($sql, array(':vocabulary' => $vocabulary->name))->fetchField();
-  }
-}

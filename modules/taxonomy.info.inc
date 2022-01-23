@@ -99,7 +99,7 @@ function entity_plus_metadata_taxonomy_entity_property_info() {
   $properties['hierarchy'] = array(
     'label' => t('Hierarchy'),
     'type' => 'integer',
-    'description' => t('The type of hierarchy allowed within the vocabulary.'), 
+    'description' => t('The type of hierarchy allowed within the vocabulary.'),
   );
   $properties['description'] = array(
     'label' => t("Description"),

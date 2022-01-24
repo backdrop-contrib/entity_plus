@@ -1211,7 +1211,7 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
   }
 
   /**
-   * Set up the property info
+   * Set up the property info.
    */
   public function setUp() {
     $this->propertyInfo = entity_plus_get_property_info('taxonomy_vocabulary') + array('properties' => array());

@@ -1207,6 +1207,13 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
    */
   public function __construct($type, $data = NULL, $info = array()) {
     parent::__construct($type, $data, $info);
+    $this->setUp();
+  }
+
+  /**
+   * Set up the property info
+   */
+  public function setUp() {
     $this->propertyInfo = entity_plus_get_property_info('taxonomy_vocabulary') + array('properties' => array());
     $info = $this->info + array('property info' => array());
     $this->propertyInfo['properties'] += $info['property info'];
@@ -1257,13 +1264,13 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
     }
     elseif (is_object($data) && $data instanceof EntityVocabularyWrapper) {
       // We got a wrapped vocabulary passed, so take over its values.
-      $this->machineName = $data->machineName;
+      $this->machineName = $data->machine_name;
       $this->data = $data->data;
     }
     elseif (is_object($data)) {
       // We got the entity object passed.
       $this->data = $data;
-      $machine_name = $data->machineName;
+      $machine_name = $data->machine_name;
       $this->machineName = isset($machine_name) ? $machine_name : FALSE;
     }
     else {
@@ -1338,6 +1345,32 @@ class EntityVocabularyWrapper extends EntityStructureWrapper {
       taxonomy_vocabulary_delete($this->machineName);
     }
     return $this;
+  }
+
+  /**
+   * Prepare for serializiation.
+   */
+  public function __sleep() {
+    $vars = parent::__sleep();
+    // Don't serialize the loaded vocabulary and its property info.
+    unset($vars['data'], $vars['propertyInfo'], $vars['propertyInfoAltered']);
+    // In case the vocabulary is not saved yet, serialize the unsaved data.
+    if ($this->dataAvailable() && !taxonomy_vocabulary_load($this->machineName)) {
+      $vars['data'] = 'data';
+    }
+    return $vars;
+  }
+
+  /**
+   * Magic wake up function.
+   */
+  public function __wakeup() {
+    $this->setUp();
+    if (taxonomy_vocabulary_load($this->machineName)) {
+      // This vocabulary was previously saved, therefore
+      // make sure data is set, so the vocabulary will be loaded when needed.
+      $this->data = FALSE;
+    }
   }
 }
 

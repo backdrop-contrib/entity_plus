@@ -57,6 +57,9 @@ function entity_metadata_wrapper($type, $data = NULL, array $info = array()) {
   elseif (isset($info['property info'])) {
     return new EntityStructureWrapper($type, $data, $info);
   }
+  elseif ($type == 'taxonomy_vocabulary') {
+    return new EntityVocabularyWrapper($type, $data, $info);
+  }
   else {
     return new EntityValueWrapper($type, $data, $info);
   }
@@ -86,6 +89,7 @@ function entity_plus_autoload_info() {
     'EntityListWrapper' => 'includes/entity_plus.wrapper.inc',
     'EntityBackdropWrapper' => 'includes/entity_plus.wrapper.inc',
     'EntityMetadataWrapper' => 'includes/entity_plus.wrapper.inc',
+    'EntityVocabularyWrapper' => 'includes/entity_plus.wrapper.inc',
     'EntityMetadataWrapperException' => 'includes/entity_plus.wrapper.inc',
     'EntityMetadataWrapperIterator' => 'includes/entity_plus.wrapper.inc',
     'EntityMetadataArrayObject' => 'includes/entity_plus.wrapper.inc',

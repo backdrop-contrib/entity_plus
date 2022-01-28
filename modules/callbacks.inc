@@ -923,16 +923,6 @@ function entity_plus_metadata_create_node($values = array()) {
 }
 
 /**
- * Callback to save a user account.
- */
-function entity_plus_metadata_user_save($account) {
-  $edit = (array) $account;
-  // Don't save the hashed password as password.
-  unset($edit['pass']);
-  user_save($account, $edit);
-}
-
-/**
  * Callback to delete a file. Watch out to not accidentilly implement hook_file_delete().
  */
 function entity_plus_metadata_delete_file($fid) {

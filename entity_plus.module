@@ -114,6 +114,7 @@ function entity_plus_autoload_info() {
     'entity_plus_views_handler_relationship_by_bundle' => 'views/handlers/entity_plus_views_handler_relationship_by_bundle.inc',
     'entity_plus_views_handler_relationship' => 'views/handlers/entity_plus_views_handler_relationship.inc',
     'entity_plus_views_plugin_row_entity_view' => 'views/plugins/entity_plus_views_plugin_row_entity_view.inc',
+    'EntityDefaultI18nStringController' => 'includes/entity_plus.i18n.inc',
   );
 }
 
@@ -367,7 +368,7 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
  *   of the entity, as returned by entity_uri().
  *   This parameter is only supported for entities which controller is a
  *   EntityPlusControllerInterface.
- * 
+ *
  * @return array
  *   The renderable array, keyed by the entity type and by entity identifiers,
  *   for which the entity name is used if existing - see entity_plus_id(). If there
@@ -424,7 +425,7 @@ function entity_plus_access($op, $entity_plus_type, $entity = NULL, $account = N
  *
  * @param string $table
  *   The name of the table as used in hook_schema().
- * 
+ *
  * @return array
  *   An array of property info as suiting for hook_entity_property_info().
  */
@@ -509,7 +510,7 @@ function entity_plus_key_array_by_property(array $entities, $property) {
  * @param string $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
- * 
+ *
  * @return array
  *   The renderable array.
  */
@@ -542,7 +543,7 @@ function entity_plus_build_content($entity_plus_type, $entity, $view_mode = 'ful
  *   The ID of the entity to load, passed by the menu URL.
  * @param string $entity_plus_type
  *   The type of the entity to load.
- * 
+ *
  * @return object
  *   A fully loaded entity object, or FALSE in case of error.
  */

@@ -298,7 +298,7 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
   $entity_plus_info['node']['deletion callback'] = 'node_delete';
   $entity_plus_info['node']['revision deletion callback'] = 'node_revision_delete';
   $entity_plus_info['user']['creation callback'] = 'entity_plus_metadata_create_object';
-  $entity_plus_info['user']['save callback'] = 'entity_plus_metadata_user_save';
+  $entity_plus_info['user']['save callback'] = 'user_save';
   $entity_plus_info['user']['deletion callback'] = 'user_delete';
   $entity_plus_info['file']['save callback'] = 'file_save';
   $entity_plus_info['file']['deletion callback'] = 'entity_plus_metadata_delete_file';

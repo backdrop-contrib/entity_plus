@@ -1067,3 +1067,30 @@ function entity_plus_metadata_site_wrapper() {
   $info['property info'] = $site_info['properties'];
   return entity_metadata_wrapper('site', FALSE, $info);
 }
+
+/**
+ * Implements hook_modules_enabled().
+ */
+function entity_plus_modules_enabled($modules) {
+  foreach (_entity_plus_modules_get_default_types($modules) as $type) {
+    _entity_plus_defaults_rebuild($type);
+  }
+}
+
+/**
+ * Gets all entity types for which defaults are provided by the $modules.
+ */
+function _entity_plus_modules_get_default_types($modules) {
+  $types = array();
+  foreach (entity_plus_crud_get_info() as $entity_type => $info) {
+    if (!empty($info['exportable'])) {
+      $hook = isset($info['export']['default hook']) ? $info['export']['default hook'] : 'default_' . $entity_type;
+      foreach ($modules as $module) {
+        if (module_hook($module, $hook) || module_hook($module, $hook . '_alter')) {
+          $types[] = $entity_type;
+        }
+      }
+    }
+  }
+  return $types;
+}

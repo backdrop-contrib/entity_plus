@@ -1003,6 +1003,55 @@ function entity_plus_theme() {
     ),
   );
 }
+
+/**
+ * Exports an entity.
+ *
+ * Note: Currently, this only works for entity types provided with the entity
+ * CRUD API.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param $entity
+ *   The entity to export.
+ * @param $prefix
+ *   An optional prefix for each line.
+ * @return
+ *   The exported entity as serialized string. The format is determined by the
+ *   respective entity controller, e.g. it is JSON for the EntityAPIController.
+ *   The output is suitable for entity_import().
+ */
+function entity_plus_export($entity_type, $entity, $prefix = '') {
+  if (method_exists($entity, 'export')) {
+    return $entity->export($prefix);
+  }
+  $info = entity_get_info($entity_type);
+  if (in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
+    return entity_get_controller($entity_type)->export($entity, $prefix);
+  }
+}
+
+/**
+ * Imports an entity.
+ *
+ * Note: Currently, this only works for entity types provided with the entity
+ * CRUD API.
+ *
+ * @param $entity_type
+ *   The type of the entity.
+ * @param string $export
+ *   The string containing the serialized entity as produced by
+ *   entity_export().
+ * @return
+ *   The imported entity object not yet saved.
+ */
+function entity_plus_import($entity_type, $export) {
+  $info = entity_get_info($entity_type);
+  if (in_array('EntityPlusControllerInterface', class_implements($info['controller class']))) {
+    return entity_get_controller($entity_type)->import($export);
+  }
+}
+
 /**
  * Checks whether an entity type is fieldable.
  *

@@ -1010,13 +1010,13 @@ function entity_plus_theme() {
  * Note: Currently, this only works for entity types provided with the entity
  * CRUD API.
  *
- * @param $entity_type
+ * @param string $entity_type
  *   The type of the entity.
- * @param $entity
+ * @param EntityInterface $entity
  *   The entity to export.
- * @param $prefix
+ * @param string $prefix
  *   An optional prefix for each line.
- * @return
+ * @return EntityPlusControllerInterface
  *   The exported entity as serialized string. The format is determined by the
  *   respective entity controller, e.g. it is JSON for the EntityAPIController.
  *   The output is suitable for entity_import().
@@ -1037,12 +1037,12 @@ function entity_plus_export($entity_type, $entity, $prefix = '') {
  * Note: Currently, this only works for entity types provided with the entity
  * CRUD API.
  *
- * @param $entity_type
+ * @param string$entity_type
  *   The type of the entity.
- * @param string $export
+ * @param string string $export
  *   The string containing the serialized entity as produced by
  *   entity_export().
- * @return
+ * @return EntityInterface
  *   The imported entity object not yet saved.
  */
 function entity_plus_import($entity_type, $export) {

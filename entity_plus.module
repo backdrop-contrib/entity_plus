@@ -1107,7 +1107,11 @@ function entity_plus_modules_disabled($modules) {
       return;
     }
 
-    $keys = $info['entity keys'] + array('module' => 'module', 'status' => 'status', 'name' => $info['entity keys']['id']);
+    $keys = $info['entity keys'] + array(
+      'module' => 'module',
+      'status' => 'status',
+      'name' => $info['entity keys']['id'],
+    );
     // Remove entities provided in code by one of the disabled modules.
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', $entity_type, '=')
@@ -1115,7 +1119,7 @@ function entity_plus_modules_disabled($modules) {
           ->propertyCondition($keys['status'], array(ENTITY_PLUS_IN_CODE, ENTITY_PLUS_FIXED), 'IN');
     $result = $query->execute();
     if (isset($result[$entity_type])) {
-      $entities = entity_load($entity_type, array_keys($result[$entity_type]));
+      $entities = entity_load_multiple($entity_type, array_keys($result[$entity_type]));
       entity_delete_multiple($entity_type, array_keys($entities));
     }
 
@@ -1126,10 +1130,10 @@ function entity_plus_modules_disabled($modules) {
           ->propertyCondition($keys['status'], ENTITY_PLUS_OVERRIDDEN, '=');
     $result = $query->execute();
     if (isset($result[$entity_type])) {
-      foreach (entity_load($entity_type, array_keys($result[$entity_type])) as $name => $entity) {
+      foreach (entity_load_multiple($entity_type, array_keys($result[$entity_type])) as $name => $entity) {
         $entity->{$keys['status']} = ENTITY_PLUS_CUSTOM;
         $entity->{$keys['module']} = NULL;
-        entity_save($entity_type, $entity);
+        entity_plus_save($entity_type, $entity);
       }
     }
 

@@ -496,6 +496,8 @@ class EntityPlusMetadataTestCase extends EntityPlusHelperTestCase {
 
     // Save vocabulary with wrapper save method.
     $vocabulary_wrapper->save();
+    // Remove 'original' to allow comparison
+    unset($vocabulary->original);
     $vocabulary2 = taxonomy_vocabulary_load($machine_name);
     $this->assertEqual($vocabulary2, $vocabulary, 'Vocabulary was saved correctly.');
 

@@ -89,7 +89,7 @@ function template_preprocess_entity_plus_property(&$variables, $hook) {
   $variables['property_name_css'] = strtr($element['#property_name'], '_', '-');
   $variables['attributes_array']['class'][] = 'entity-property';
   $variables['attributes_array']['class'][] = 'entity-property-' . $variables['property_name_css'];
-  
+
   if (isset($element['#label_display']) && $element['#label_display'] == 'inline') {
     $variables['attributes_array']['class'][] = 'entity-property-' . $element['#label_display'];
     $variables['attributes_array']['class'][]  = 'clearfix';

@@ -50,15 +50,21 @@ function entity_plus_metadata_node_entity_property_info() {
     'schema field' => 'title',
     'required' => TRUE,
   );
+
+  // For backward compatibility this property name is kept.
   $properties['language'] = array(
     'label' => t("Language"),
     'type' => 'token',
     'description' => t("The language the node is written in."),
     'setter callback' => 'entity_plus_property_verbatim_set',
     'options list' => 'entity_plus_metadata_language_list',
-    'schema field' => 'language',
+    'schema field' => 'langcode',
     'setter permission' => 'administer nodes',
   );
+
+  // Provide a langcode property that matches the actual node field.
+  $properties['langcode'] = $properties['language'];
+  
   $properties['url'] = array(
     'label' => t("URL"),
     'description' => t("The URL of the node."),

@@ -128,5 +128,16 @@ function entity_plus_metadata_system_entity_property_info() {
     'getter callback' => 'entity_plus_metadata_system_get_file_properties',
     'schema field' => 'uid',
   );
+  $properties['type'] = array(
+    'label' => t('File type'),
+    'type' => 'token',
+    'description' => t('The type of the file.'),
+    'setter callback' => 'entity_plus_property_verbatim_set',
+    'setter permission' => 'administer files',
+    'options list' => 'file_type_get_names',
+    'required' => TRUE,
+    'schema field' => 'type',
+  );
+
   return $info;
 }

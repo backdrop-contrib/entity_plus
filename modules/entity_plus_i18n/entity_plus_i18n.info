@@ -1,0 +1,5 @@
+name = Entity Plus Internationalization Integration
+description = Integration with Internationalization (i18n) for custom entities.
+
+backdrop = 1.x
+type = module

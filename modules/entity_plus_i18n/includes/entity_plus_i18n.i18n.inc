@@ -122,7 +122,7 @@ class EntityDefaultI18nStringController {
    * Defines the menu wildcard used by self::hook_object_info().
    */
   protected function menuWildcard() {
-    return isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_plus_object';
+    return isset($this->entityInfo['admin ui']['menu wildcard']) ? $this->entityInfo['admin ui']['menu wildcard'] : '%entity_ui_object';
   }
 
   /**

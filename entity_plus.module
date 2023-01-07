@@ -1193,3 +1193,24 @@ function entity_plus_modules_disabled($modules) {
     _entity_plus_defaults_rebuild($entity_type);
   }
 }
+
+/**
+ * Helper for using i18n_string().
+ * 
+ * For backward compatibility, this function (which can be called even if 
+ * i18n_string is not enabled) is kept in this module rather than in the new 
+ * submodule entity_plus_i18n.
+ *
+ * @param $name
+ *   Textgroup and context glued with ':'.
+ * @param $default
+ *   String in default language. Default language may or may not be English.
+ * @param $langcode
+ *   (optional) The code of a certain language to translate the string into.
+ *   Defaults to the i18n_string() default, i.e. the current language.
+ *
+ * @see i18n_string()
+ */
+function entity_plus_i18n_string($name, $default, $langcode = NULL) {
+  return function_exists('i18n_string') ? i18n_string($name, $default, array('langcode' => $langcode)) : $default;
+}

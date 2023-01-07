@@ -410,14 +410,24 @@ function entity_plus_property_verbatim_get($data, array $options, $name, $type, 
     return $data[$name];
   }
   elseif (is_object($data) && isset($data->$name)) {
+    $value = $data->$name;
     // Incorporate i18n_string translations. We may rely on the entity class
     // here as its usage is required by the i18n integration.
     if (isset($options['language']) && !empty($info['i18n string'])) {
-      return $data->getTranslation($name, $options['language']->langcode);
+      if (method_exists($data, 'getTranslation')) {
+        $value = $data->getTranslation($name, $options['language']->langcode);
+      } 
+      elseif ($data instanceof EntityInterface) {
+        $entity_info = entity_get_info($data->entityType());
+        // hook_entity_info() must include a 'module' key, as this is needed
+        // for string translation.
+        if (!empty($entity_info['module'])) {
+          $textgroup = $entity_info['module'] . ':' . $data->entityType() . ':' . $data->id() . ':' . $name; 
+          $value = entity_plus_i18n_string($textgroup, $data->$name, $options['language']->langcode);
+        }
+      }
     }
-    else {
-      return $data->$name;
-    }
+    return $value;
   }
   return NULL;
 }

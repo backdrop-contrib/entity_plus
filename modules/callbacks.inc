@@ -130,6 +130,17 @@ function entity_plus_metadata_status_options_list() {
 }
 
 /**
+ * Return the options lists for the node and comment status property.
+ */
+function entity_plus_metadata_node_comment_settings_options_list() {
+  return array(
+    COMMENT_NODE_OPEN => t('Open'),
+    COMMENT_NODE_CLOSED => t('Closed'),
+    COMMENT_NODE_HIDDEN => t('Closed and hidden'),
+  );
+}
+
+/**
  * Callback for getting node properties.
  *
  * @see entity_plus_metadata_node_entity_plus_info_alter()

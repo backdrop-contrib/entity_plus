@@ -21,8 +21,8 @@ interface EntityPlusControllerInterface extends EntityControllerInterface {
   public function delete($ids);
 
   /**
-   * Invokes a hook on behalf of the entity. 
-   * 
+   * Invokes a hook on behalf of the entity.
+   *
    * For hooks that have a respective field API attacher like insert/update/.. the attacher is called too.
    */
   public function invoke($hook, $entity);
@@ -61,7 +61,7 @@ interface EntityPlusControllerInterface extends EntityControllerInterface {
    *
    * @param array $values
    *   An array of values to set, keyed by property name.
-   * 
+   *
    * @return object
    *   A new instance of the entity type.
    */
@@ -106,7 +106,7 @@ interface EntityPlusControllerInterface extends EntityControllerInterface {
    * @param string $langcode
    *   (optional) A language code to use for rendering. Defaults to the global
    *   content language of the current request.
-   * 
+   *
    * @return array
    *   The renderable array.
    */
@@ -131,7 +131,7 @@ interface EntityPlusControllerInterface extends EntityControllerInterface {
    *   of the entity, as returned by entity_uri().
    *   This parameter is only supported for entities which controller is a
    *   EntityPlusControllerInterface.
-   * 
+   *
    * @return array
    *   The renderable array, keyed by entity name or numeric id.
    */
@@ -221,7 +221,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
 
   /**
    * Overridden. In contrast to the parent implementation we factor out query execution, so fetching can be further customized easily.
-   * 
+   *
    * @see BackdropDefaultEntityController::load()
    */
   public function load($ids = array(), $conditions = array()) {
@@ -638,7 +638,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
 
     // Allow modules to change the view mode.
     $context = array(
-      'entity_plus_type' => $this->entityType,
+      'entity_type' => $this->entityType,
       'entity' => $entity,
       'langcode' => $langcode,
     );
@@ -723,7 +723,7 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
         // generic one.
         // @see template_preprocess_entity()
         '#theme' => 'entity_plus',
-        '#entity_plus_type' => $this->entityType,
+        '#entity_type' => $this->entityType,
         '#entity' => $entity,
         '#view_mode' => $view_mode,
         '#language' => $langcode,
@@ -887,7 +887,7 @@ class EntityPlusControllerExportable extends EntityPlusController {
 
   /**
    * Overridden. Changed to call type-specific hook with the entities keyed by name if they have one.
-   * 
+   *
    * @see BackdropDefaultEntityController::attachLoad()
    */
   protected function attachLoad(&$queried_entities, $revision_id = FALSE) {

@@ -139,7 +139,7 @@ function entity_plus_property_default_render_value_by_type(EntityMetadataWrapper
  */
 function template_preprocess_entity_plus(&$variables) {
   $variables['view_mode'] = $variables['elements']['#view_mode'];
-  $entity_type = $variables['elements']['#entity_plus_type'];
+  $entity_type = $variables['elements']['#entity_type'];
   $variables['entity_type'] = $entity_type;
   $entity = $variables['elements']['#entity'];
   $variables[$entity_type] = $entity;

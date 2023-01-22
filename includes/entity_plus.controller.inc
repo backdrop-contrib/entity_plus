@@ -639,6 +639,8 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
     // Allow modules to change the view mode.
     $context = array(
       'entity_type' => $this->entityType,
+      // Leaving for backwards compatibility (https://github.com/backdrop-contrib/entity_plus/issues/44).
+      'entity_plus_type' => $this->entityType,
       'entity' => $entity,
       'langcode' => $langcode,
     );
@@ -719,15 +721,18 @@ class EntityPlusController extends DefaultEntityController implements EntityPlus
     foreach ($entities as $entity) {
       $build = entity_plus_build_content($this->entityType, $entity, $view_mode, $langcode);
       $build += array(
-        // If the entity type provides an implementation, use this instead the
-        // generic one.
+        // If the entity type provides an implementation, use this instead of
+        // the generic one.
         // @see template_preprocess_entity()
         '#theme' => 'entity_plus',
-        '#entity_type' => $this->entityType,
         '#entity' => $entity,
         '#view_mode' => $view_mode,
         '#language' => $langcode,
         '#page' => $page,
+        '#entity_type' => $this->entityType,
+        // Include entity_plus_type for backwards compatibility.
+        // (See https://github.com/backdrop-contrib/entity_plus/issues/44).
+        '#entity_plus_type' => $this->entityType,
       );
       // Allow modules to modify the structured entity.
       backdrop_alter(array($this->entityType . '_view', 'entity_plus_view'), $build, $this->entityType);

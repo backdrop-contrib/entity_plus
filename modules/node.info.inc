@@ -52,10 +52,10 @@ function entity_plus_metadata_node_entity_property_info() {
   );
 
   // For backward compatibility this property name is kept.
-  $properties['language'] = array(
-    'label' => t("Language"),
+  $properties['langcode'] = array(
+    'label' => t("Language code"),
     'type' => 'token',
-    'description' => t("The language the node is written in."),
+    'description' => t("The code of the language the node is written in."),
     'setter callback' => 'entity_plus_property_verbatim_set',
     'options list' => 'entity_plus_metadata_language_list',
     'schema field' => 'langcode',
@@ -63,7 +63,9 @@ function entity_plus_metadata_node_entity_property_info() {
   );
 
   // Provide a langcode property that matches the actual node field.
-  $properties['langcode'] = $properties['language'];
+  $properties['language'] = array(
+    'label' => t('Language (deprecated - use "Language code")'),
+  ) + $properties['langcode'];
   
   $properties['url'] = array(
     'label' => t("URL"),

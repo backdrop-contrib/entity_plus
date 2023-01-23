@@ -380,7 +380,7 @@ function _entity_plus_info_add_metadata(&$entity_plus_info) {
  *   of the entity, as returned by entity_uri().
  *   This parameter is only supported for entities which controller is a
  *   EntityPlusControllerInterface.
- * 
+ *
  * @return array
  *   The renderable array, keyed by the entity type and by entity identifiers,
  *   for which the entity name is used if existing - see entity_plus_id(). If there
@@ -437,7 +437,7 @@ function entity_plus_access($op, $entity_plus_type, $entity = NULL, $account = N
  *
  * @param string $table
  *   The name of the table as used in hook_schema().
- * 
+ *
  * @return array
  *   An array of property info as suiting for hook_entity_property_info().
  */
@@ -522,7 +522,7 @@ function entity_plus_key_array_by_property(array $entities, $property) {
  * @param string $langcode
  *   (optional) A language code to use for rendering. Defaults to the global
  *   content language of the current request.
- * 
+ *
  * @return array
  *   The renderable array.
  */
@@ -555,7 +555,7 @@ function entity_plus_build_content($entity_plus_type, $entity, $view_mode = 'ful
  *   The ID of the entity to load, passed by the menu URL.
  * @param string $entity_plus_type
  *   The type of the entity to load.
- * 
+ *
  * @return object
  *   A fully loaded entity object, or FALSE in case of error.
  */
@@ -1205,4 +1205,25 @@ function entity_plus_modules_disabled($modules) {
     // are gone.
     _entity_plus_defaults_rebuild($entity_type);
   }
+}
+
+/**
+ * Helper for using i18n_string().
+ * 
+ * For backward compatibility, this function (which can be called even if 
+ * i18n_string is not enabled) is kept in this module rather than in the new 
+ * submodule entity_plus_i18n.
+ *
+ * @param $name
+ *   Textgroup and context glued with ':'.
+ * @param $default
+ *   String in default language. Default language may or may not be English.
+ * @param $langcode
+ *   (optional) The code of a certain language to translate the string into.
+ *   Defaults to the i18n_string() default, i.e. the current language.
+ *
+ * @see i18n_string()
+ */
+function entity_plus_i18n_string($name, $default, $langcode = NULL) {
+  return function_exists('i18n_string') ? i18n_string($name, $default, array('langcode' => $langcode)) : $default;
 }

@@ -6,5 +6,4 @@ type = module
 
 dependencies[] = entity_plus
 dependencies[] = entity_ui
-dependencies[] = i18n
- 
+dependencies[] = i18n_string

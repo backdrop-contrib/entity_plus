@@ -313,6 +313,9 @@ function entity_plus_metadata_taxonomy_term_get_properties($term, array $options
       return count(taxonomy_select_nodes($term->tid));
 
     case 'description':
+      if (empty($term->description)) {
+        return '';
+      }
       return check_markup($term->description, isset($term->format) ? $term->format : NULL, '', TRUE);
 
     case 'parent':

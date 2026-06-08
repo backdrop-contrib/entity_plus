@@ -6,4 +6,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run Tests
-        uses: backdrop-ops/gha/actions/simpletest@main
+        uses: backdrop-ops/gha/actions/simpletest@v1

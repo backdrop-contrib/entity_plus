@@ -6,4 +6,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Run PHP_CodeSniffer
-        uses: backdrop-ops/gha/actions/phpcs_changed@main
+        uses: backdrop-ops/gha/actions/phpcs_changed@v1

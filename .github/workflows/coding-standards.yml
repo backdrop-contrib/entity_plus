@@ -4,4 +4,4 @@ on: [pull_request]
 
 jobs:
   phpcs:
-    uses: backdrop-ops/gha/.github/workflows/phpcs.yml@main
+    uses: backdrop-ops/gha/actions/phpcs_changed@main

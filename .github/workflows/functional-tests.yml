@@ -1,7 +1,9 @@
-name: Functional Tests
-
+name: Simpletest
 on: [pull_request]
-
 jobs:
-  phpcs:
-    uses: backdrop-ops/gha/actions/simpletest@main
+  functional_test:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Tests
+        uses: backdrop-ops/gha/actions/simpletest@main

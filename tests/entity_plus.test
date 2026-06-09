@@ -48,6 +48,21 @@ abstract class EntityPlusHelperTestCase extends BackdropWebTestCase {
  */
 class EntityPlusMetadataTestCase extends EntityPlusHelperTestCase {
 
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * @var array
+   */
+  protected $instance;
+
   function setUp() {
     parent::setUp('entity_plus', 'locale');
     // Create a field having 4 values for testing multiple value support.

@@ -835,8 +835,8 @@ function _entity_plus_defaults_rebuild($entity_type) {
     );
 
     // Check for the existence of the module and status columns.
-    if (!in_array($keys['status'], $info['schema_fields_sql']['base table']) || !in_array($keys['module'], $info['schema_fields_sql']['base table'])) {
-      trigger_error("Missing database columns for the exportable entity $entity_type as defined by entity_plus_exportable_schema_fields(). Update the according module and run update.php!", E_USER_WARNING);
+    if (empty($info['cmi storage']) && (!in_array($keys['status'], $info['schema_fields_sql']['base table']) || !in_array($keys['module'], $info['schema_fields_sql']['base table']))) {
+      trigger_error("Missing database status and module columns for the exportable entity $entity_type.", E_USER_WARNING);
       return;
     }
 

@@ -229,6 +229,11 @@
  *      may use this value to decide whether they should deal with a certain entity
  *      type. Defaults to TRUE to for entity types that are exportable, else to
  *      FALSE.
+ *    - cmi storage: (optional) A boolean flag for configuration or exportable
+ *      entities to indicate that this entity is stored as a Backdrop json CMI 
+ *      configuration, instead of on its own table in the database. It defaults
+ *      to FALSE. NB: modules wishing to store entities as CMI should override
+ *      EntityPlusControllerExportable to handle all CMI CRUD operations.
  *
  * @see entity_load()
  * @see hook_entity_info_alter()
